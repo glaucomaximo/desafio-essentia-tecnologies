@@ -4,6 +4,14 @@ Todas as alterações relevantes deste projeto são documentadas aqui.
 
 Autor: Glauco Maximo <glaucomaximo@gmail.com>
 
+## [1.1.3] - 2026-09-03
+
+### Corrigido
+
+- Atualizados pacotes OpenSSL da imagem runtime do backend durante o build OCI.
+- Removidos `npm`, `npx` e `corepack` da imagem final do backend, reduzindo superfície de ataque em produção.
+- Atualizada a imagem runtime do frontend para Nginx unprivileged suportado, com atualização mínima de bibliotecas do sistema usadas pelo scanner OCI.
+
 ## [1.1.2] - 2026-09-03
 
 ### Corrigido

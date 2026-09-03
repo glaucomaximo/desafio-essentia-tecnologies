@@ -12,7 +12,13 @@ COPY frontend ./frontend
 
 RUN npm --workspace frontend run build
 
-FROM nginxinc/nginx-unprivileged:1.27-alpine
+FROM nginxinc/nginx-unprivileged:1.29.3-alpine
+
+USER root
+
+RUN apk upgrade --no-cache c-ares libcrypto3 libssl3 libexpat libpng libxml2 musl musl-utils nghttp2-libs zlib
+
+USER nginx
 
 COPY frontend/nginx.conf /etc/nginx/conf.d/default.conf
 COPY --from=build /app/frontend/dist/techx-tasks/browser /usr/share/nginx/html

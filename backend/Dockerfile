@@ -21,13 +21,19 @@ ENV PORT=3333
 
 WORKDIR /app
 
-RUN addgroup -S techx && adduser -S techx -G techx
+RUN apk upgrade --no-cache libcrypto3 libssl3 && addgroup -S techx && adduser -S techx -G techx
 
 COPY package.json package-lock.json ./
 COPY backend/package.json ./backend/package.json
 COPY frontend/package.json ./frontend/package.json
 
-RUN npm ci --workspace backend --omit=dev && npm cache clean --force
+RUN npm ci --workspace backend --omit=dev \
+  && npm cache clean --force \
+  && rm -rf /usr/local/lib/node_modules/npm \
+    /usr/local/lib/node_modules/corepack \
+    /usr/local/bin/npm \
+    /usr/local/bin/npx \
+    /usr/local/bin/corepack
 
 COPY --from=build --chown=techx:techx /app/backend/dist ./backend/dist
 
