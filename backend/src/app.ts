@@ -35,7 +35,7 @@ export const createApp = (options: AppOptions = {}): Express => {
   app.use(helmet());
   app.use(
     cors({
-      origin: env.corsOrigin === "*" ? true : env.corsOrigin
+      origin: env.corsOrigin === "*" ? false : env.corsOrigin
     })
   );
   app.use(express.json({ limit: env.jsonBodyLimit }));
