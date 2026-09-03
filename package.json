@@ -1,6 +1,6 @@
 {
   "name": "desafio-essentia-tecnologies",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "private": true,
   "description": "Aplicação fullstack de gerenciamento de tarefas para o desafio Essentia Group.",
   "author": "Glauco Maximo <glaucomaximo@gmail.com>",

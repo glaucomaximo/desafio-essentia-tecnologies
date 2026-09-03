@@ -4,6 +4,12 @@ Todas as alterações relevantes deste projeto são documentadas aqui.
 
 Autor: Glauco Maximo <glaucomaximo@gmail.com>
 
+## [1.1.2] - 2026-09-03
+
+### Corrigido
+
+- Atualizada a ação Trivy do CI para uma versão existente e estável, restaurando o job de build e varredura OCI no GitHub Actions.
+
 ## [1.1.1] - 2026-09-03
 
 ### Alterado
