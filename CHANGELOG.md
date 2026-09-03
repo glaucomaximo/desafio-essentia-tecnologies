@@ -4,6 +4,13 @@ Todas as alterações relevantes deste projeto são documentadas aqui.
 
 Autor: Glauco Maximo <glaucomaximo@gmail.com>
 
+## [1.0.1] - 2026-09-03
+
+### Corrigido
+
+- Atualização reativa da interface Angular após chamadas assíncronas da API.
+- Estado de carregamento da lista de tarefas agora é encerrado corretamente no navegador.
+
 ## [1.0.0] - 2026-09-02
 
 ### Adicionado

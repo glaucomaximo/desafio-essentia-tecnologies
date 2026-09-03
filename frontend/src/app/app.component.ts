@@ -1,5 +1,5 @@
 import { CommonModule } from "@angular/common";
-import { Component, OnInit, inject } from "@angular/core";
+import { Component, OnInit, computed, inject, signal } from "@angular/core";
 import { FormBuilder, ReactiveFormsModule, Validators } from "@angular/forms";
 import { finalize } from "rxjs";
 import { TaskApiService } from "./core/task-api.service";
@@ -21,60 +21,60 @@ export class AppComponent implements OnInit {
     description: [""]
   });
 
-  tasks: Task[] = [];
-  filter: TaskFilter = "all";
-  editingTaskId: number | null = null;
-  loading = false;
-  saving = false;
-  errorMessage = "";
+  readonly tasks = signal<Task[]>([]);
+  readonly filter = signal<TaskFilter>("all");
+  readonly editingTaskId = signal<number | null>(null);
+  readonly loading = signal(false);
+  readonly saving = signal(false);
+  readonly errorMessage = signal("");
+
+  readonly visibleTasks = computed(() => {
+    const tasks = this.tasks();
+
+    if (this.filter() === "open") {
+      return tasks.filter((task) => !task.completed);
+    }
+
+    if (this.filter() === "done") {
+      return tasks.filter((task) => task.completed);
+    }
+
+    return tasks;
+  });
+
+  readonly pendingTasksCount = computed(
+    () => this.tasks().filter((task) => !task.completed).length
+  );
+
+  readonly completedTasksCount = computed(
+    () => this.tasks().filter((task) => task.completed).length
+  );
+
+  readonly isEditing = computed(() => this.editingTaskId() !== null);
 
   ngOnInit(): void {
     this.loadTasks();
   }
 
-  get visibleTasks(): Task[] {
-    if (this.filter === "open") {
-      return this.tasks.filter((task) => !task.completed);
-    }
-
-    if (this.filter === "done") {
-      return this.tasks.filter((task) => task.completed);
-    }
-
-    return this.tasks;
-  }
-
-  get pendingTasksCount(): number {
-    return this.tasks.filter((task) => !task.completed).length;
-  }
-
-  get completedTasksCount(): number {
-    return this.tasks.filter((task) => task.completed).length;
-  }
-
-  get isEditing(): boolean {
-    return this.editingTaskId !== null;
-  }
-
   loadTasks(): void {
-    this.loading = true;
-    this.errorMessage = "";
+    this.loading.set(true);
+    this.errorMessage.set("");
 
     this.taskApi
       .getTasks()
-      .pipe(finalize(() => (this.loading = false)))
+      .pipe(finalize(() => this.loading.set(false)))
       .subscribe({
         next: (tasks) => {
-          this.tasks = tasks;
+          this.tasks.set(tasks);
         },
         error: () => {
-          this.errorMessage = "Nao foi possivel carregar as tarefas.";
+          this.errorMessage.set("Nao foi possivel carregar as tarefas.");
         }
       });
   }
 
   setFilter(filter: TaskFilter): void {
-    this.filter = filter;
+    this.filter.set(filter);
   }
 
   submitTask(): void {
@@ -88,27 +88,28 @@ export class AppComponent implements OnInit {
       description: this.taskForm.controls.description.value.trim() || null
     };
 
+    const editingTaskId = this.editingTaskId();
     const request =
-      this.editingTaskId === null
+      editingTaskId === null
         ? this.taskApi.createTask(payload)
-        : this.taskApi.updateTask(this.editingTaskId, payload);
+        : this.taskApi.updateTask(editingTaskId, payload);
 
-    this.saving = true;
-    this.errorMessage = "";
+    this.saving.set(true);
+    this.errorMessage.set("");
 
-    request.pipe(finalize(() => (this.saving = false))).subscribe({
+    request.pipe(finalize(() => this.saving.set(false))).subscribe({
       next: () => {
         this.resetForm();
         this.loadTasks();
       },
       error: () => {
-        this.errorMessage = "Nao foi possivel salvar a tarefa.";
+        this.errorMessage.set("Nao foi possivel salvar a tarefa.");
       }
     });
   }
 
   startEditing(task: Task): void {
-    this.editingTaskId = task.id;
+    this.editingTaskId.set(task.id);
     this.taskForm.setValue({
       title: task.title,
       description: task.description ?? ""
@@ -116,7 +117,7 @@ export class AppComponent implements OnInit {
   }
 
   resetForm(): void {
-    this.editingTaskId = null;
+    this.editingTaskId.set(null);
     this.taskForm.reset({
       title: "",
       description: ""
@@ -126,12 +127,14 @@ export class AppComponent implements OnInit {
   toggleTask(task: Task): void {
     this.taskApi.updateTask(task.id, { completed: !task.completed }).subscribe({
       next: (updatedTask) => {
-        this.tasks = this.tasks.map((currentTask) =>
-          currentTask.id === updatedTask.id ? updatedTask : currentTask
+        this.tasks.update((tasks) =>
+          tasks.map((currentTask) =>
+            currentTask.id === updatedTask.id ? updatedTask : currentTask
+          )
         );
       },
       error: () => {
-        this.errorMessage = "Nao foi possivel atualizar o status da tarefa.";
+        this.errorMessage.set("Nao foi possivel atualizar o status da tarefa.");
       }
     });
   }
@@ -145,10 +148,10 @@ export class AppComponent implements OnInit {
 
     this.taskApi.deleteTask(task.id).subscribe({
       next: () => {
-        this.tasks = this.tasks.filter((currentTask) => currentTask.id !== task.id);
+        this.tasks.update((tasks) => tasks.filter((currentTask) => currentTask.id !== task.id));
       },
       error: () => {
-        this.errorMessage = "Nao foi possivel remover a tarefa.";
+        this.errorMessage.set("Nao foi possivel remover a tarefa.");
       }
     });
   }

@@ -16,10 +16,10 @@
     <div class="section-heading">
       <div>
         <p class="eyebrow">Cadastro</p>
-        <h2 id="task-form-title">{{ isEditing ? "Editar tarefa" : "Nova tarefa" }}</h2>
+        <h2 id="task-form-title">{{ isEditing() ? "Editar tarefa" : "Nova tarefa" }}</h2>
       </div>
 
-      <button *ngIf="isEditing" class="secondary-button" type="button" (click)="resetForm()">
+      <button *ngIf="isEditing()" class="secondary-button" type="button" (click)="resetForm()">
         Cancelar
       </button>
     </div>
@@ -48,8 +48,8 @@
         placeholder="Detalhes opcionais para orientar a execucao"
       ></textarea>
 
-      <button class="primary-button" type="submit" [disabled]="saving">
-        {{ saving ? "Salvando..." : isEditing ? "Salvar alteracoes" : "Adicionar tarefa" }}
+      <button class="primary-button" type="submit" [disabled]="saving()">
+        {{ saving() ? "Salvando..." : isEditing() ? "Salvar alteracoes" : "Adicionar tarefa" }}
       </button>
     </form>
   </section>
@@ -61,40 +61,40 @@
         <h2 id="task-list-title">Tarefas cadastradas</h2>
       </div>
 
-      <button class="secondary-button" type="button" (click)="loadTasks()" [disabled]="loading">
+      <button class="secondary-button" type="button" (click)="loadTasks()" [disabled]="loading()">
         Atualizar
       </button>
     </div>
 
     <div class="stats-grid" aria-label="Resumo das tarefas">
       <span
-        ><strong>{{ tasks.length }}</strong> total</span
+        ><strong>{{ tasks().length }}</strong> total</span
       >
       <span
-        ><strong>{{ pendingTasksCount }}</strong> pendentes</span
+        ><strong>{{ pendingTasksCount() }}</strong> pendentes</span
       >
       <span
-        ><strong>{{ completedTasksCount }}</strong> concluidas</span
+        ><strong>{{ completedTasksCount() }}</strong> concluidas</span
       >
     </div>
 
     <div class="segmented-control" role="group" aria-label="Filtrar tarefas">
-      <button type="button" [class.active]="filter === 'all'" (click)="setFilter('all')">
+      <button type="button" [class.active]="filter() === 'all'" (click)="setFilter('all')">
         Todas
       </button>
-      <button type="button" [class.active]="filter === 'open'" (click)="setFilter('open')">
+      <button type="button" [class.active]="filter() === 'open'" (click)="setFilter('open')">
         Pendentes
       </button>
-      <button type="button" [class.active]="filter === 'done'" (click)="setFilter('done')">
+      <button type="button" [class.active]="filter() === 'done'" (click)="setFilter('done')">
         Concluidas
       </button>
     </div>
 
-    <p class="status-message" *ngIf="loading">Carregando tarefas...</p>
-    <p class="error-message" *ngIf="errorMessage">{{ errorMessage }}</p>
+    <p class="status-message" *ngIf="loading()">Carregando tarefas...</p>
+    <p class="error-message" *ngIf="errorMessage()">{{ errorMessage() }}</p>
 
-    <ul class="task-list" *ngIf="!loading && visibleTasks.length > 0; else emptyState">
-      <li class="task-item" *ngFor="let task of visibleTasks; trackBy: trackByTaskId">
+    <ul class="task-list" *ngIf="!loading() && visibleTasks().length > 0; else emptyState">
+      <li class="task-item" *ngFor="let task of visibleTasks(); trackBy: trackByTaskId">
         <label class="completion-toggle">
           <input type="checkbox" [checked]="task.completed" (change)="toggleTask(task)" />
           <span class="checkmark" aria-hidden="true"></span>
@@ -119,7 +119,7 @@
     </ul>
 
     <ng-template #emptyState>
-      <div class="empty-state" *ngIf="!loading">
+      <div class="empty-state" *ngIf="!loading()">
         <strong>Nenhuma tarefa encontrada</strong>
         <p>Cadastre uma tarefa ou altere o filtro selecionado.</p>
       </div>
