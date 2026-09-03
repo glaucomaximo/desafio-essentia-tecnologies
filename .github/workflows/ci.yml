@@ -1,0 +1,155 @@
+name: Integração Contínua
+
+on:
+  push:
+    branches:
+      - master
+      - glauco-maximo
+  pull_request:
+    branches:
+      - master
+
+permissions:
+  contents: read
+
+jobs:
+  controles-qualidade:
+    name: Controles de Qualidade
+    runs-on: ubuntu-latest
+    steps:
+      - name: Baixar código
+        uses: actions/checkout@v4
+
+      - name: Configurar Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Instalar dependências
+        run: npm ci
+
+      - name: Verificar formatação
+        run: npm run format:check
+
+      - name: Executar lint
+        run: npm run lint
+
+      - name: Executar typecheck
+        run: npm run typecheck
+
+      - name: Executar testes
+        run: npm test
+
+      - name: Auditar dependências de produção
+        run: npm audit --omit=dev --audit-level=moderate
+
+      - name: Varrer padrões de segredo
+        shell: bash
+        run: |
+          set -euo pipefail
+          chave_aws='AKIA[0-9A-Z]{16}'
+          chave_privada='-----BEGIN (RSA|DSA|EC|OPENSSH) PRIVATE KEY-----'
+          token_github='ghp_[A-Za-z0-9_]{36,}'
+          token_slack='xox[baprs]-[A-Za-z0-9-]{10,}'
+          padrao="${chave_aws}|${chave_privada}|${token_github}|${token_slack}"
+          ! git grep -nE "${padrao}" -- ':!package-lock.json'
+
+      - name: Gerar SBOM CycloneDX
+        run: npm run sbom
+
+      - name: Publicar SBOM
+        uses: actions/upload-artifact@v4
+        with:
+          name: cyclonedx-sbom
+          path: sbom.cdx.json
+          if-no-files-found: error
+
+  sast-codeql:
+    name: SAST com CodeQL
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+    steps:
+      - name: Baixar código
+        uses: actions/checkout@v4
+
+      - name: Inicializar CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: javascript-typescript
+
+      - name: Autobuild
+        uses: github/codeql-action/autobuild@v3
+
+      - name: Analisar
+        uses: github/codeql-action/analyze@v3
+
+  revisao-dependencias:
+    name: Revisão de Dependências
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    permissions:
+      contents: read
+      pull-requests: read
+    steps:
+      - name: Baixar código
+        uses: actions/checkout@v4
+
+      - name: Revisar dependências
+        uses: actions/dependency-review-action@v4
+        with:
+          fail-on-severity: high
+
+  build-oci:
+    name: Build OCI
+    runs-on: ubuntu-latest
+    needs: controles-qualidade
+    permissions:
+      contents: read
+    steps:
+      - name: Baixar código
+        uses: actions/checkout@v4
+
+      - name: Configurar Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Construir imagem do backend
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: backend/Dockerfile
+          push: false
+          tags: techx-tasks-api:ci
+          load: true
+
+      - name: Construir imagem do frontend
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: frontend/Dockerfile
+          push: false
+          tags: techx-tasks-frontend:ci
+          load: true
+
+      - name: Varrer imagem do backend
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          image-ref: techx-tasks-api:ci
+          format: table
+          exit-code: "1"
+          ignore-unfixed: true
+          vuln-type: os,library
+          severity: CRITICAL,HIGH
+
+      - name: Varrer imagem do frontend
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          image-ref: techx-tasks-frontend:ci
+          format: table
+          exit-code: "1"
+          ignore-unfixed: true
+          vuln-type: os,library
+          severity: CRITICAL,HIGH

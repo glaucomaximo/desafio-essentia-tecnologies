@@ -1,0 +1,266 @@
+openapi: 3.1.0
+info:
+  title: API TechX Tasks
+  version: 1.0.0
+  description: API REST para o desafio fullstack da Essentia Group.
+  contact:
+    name: Glauco Maximo
+    email: glaucomaximo@gmail.com
+servers:
+  - url: http://localhost:3333
+    description: Desenvolvimento local
+tags:
+  - name: Saúde
+  - name: Tarefas
+paths:
+  /liveness:
+    get:
+      tags: [Saúde]
+      summary: Liveness do processo
+      responses:
+        "200":
+          description: O processo da API está vivo.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+  /readiness:
+    get:
+      tags: [Saúde]
+      summary: Readiness do serviço
+      responses:
+        "200":
+          description: API e banco de dados estão prontos.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+        "500":
+          description: Falha na checagem de dependência.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /health:
+    get:
+      tags: [Saúde]
+      summary: Endpoint legado de saúde
+      responses:
+        "200":
+          description: Resposta leve de saúde para compatibilidade.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+  /api/v1/tasks:
+    get:
+      tags: [Tarefas]
+      summary: Listar tarefas
+      responses:
+        "200":
+          description: Lista ordenada de tarefas.
+          headers:
+            X-Request-ID:
+              $ref: "#/components/headers/RequestId"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Task"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+    post:
+      tags: [Tarefas]
+      summary: Criar tarefa
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateTaskRequest"
+      responses:
+        "201":
+          description: Tarefa criada.
+          headers:
+            X-Request-ID:
+              $ref: "#/components/headers/RequestId"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Task"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+  /api/v1/tasks/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          minimum: 1
+    get:
+      tags: [Tarefas]
+      summary: Buscar tarefa
+      responses:
+        "200":
+          description: Tarefa encontrada.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Task"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+    put:
+      tags: [Tarefas]
+      summary: Atualizar tarefa
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateTaskRequest"
+      responses:
+        "200":
+          description: Tarefa atualizada.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Task"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+    patch:
+      tags: [Tarefas]
+      summary: Atualizar tarefa parcialmente
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateTaskRequest"
+      responses:
+        "200":
+          description: Tarefa atualizada.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Task"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+    delete:
+      tags: [Tarefas]
+      summary: Remover tarefa
+      responses:
+        "204":
+          description: Tarefa removida.
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+components:
+  headers:
+    RequestId:
+      description: Identificador de correlação da requisição.
+      schema:
+        type: string
+  responses:
+    BadRequest:
+      description: Requisição inválida.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    NotFound:
+      description: Recurso não encontrado.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    TooManyRequests:
+      description: Limite de requisições excedido.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+  schemas:
+    HealthStatus:
+      type: object
+      required: [status, service, version]
+      properties:
+        status:
+          type: string
+          enum: [ok]
+        service:
+          type: string
+        version:
+          type: string
+    Task:
+      type: object
+      required: [id, title, description, completed, createdAt, updatedAt]
+      properties:
+        id:
+          type: integer
+          minimum: 1
+        title:
+          type: string
+          maxLength: 180
+        description:
+          type:
+            - string
+            - "null"
+        completed:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    CreateTaskRequest:
+      type: object
+      required: [title]
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 180
+        description:
+          type:
+            - string
+            - "null"
+        completed:
+          type: boolean
+          default: false
+      additionalProperties: true
+    UpdateTaskRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 180
+        description:
+          type:
+            - string
+            - "null"
+        completed:
+          type: boolean
+      minProperties: 1
+      additionalProperties: true
+    ErrorResponse:
+      type: object
+      required: [message, requestId]
+      properties:
+        message:
+          type: string
+        requestId:
+          type: string
+        details: {}
