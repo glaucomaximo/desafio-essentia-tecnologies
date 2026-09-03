@@ -135,7 +135,7 @@ jobs:
           load: true
 
       - name: Varrer imagem do backend
-        uses: aquasecurity/trivy-action@0.28.0
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
           image-ref: techx-tasks-api:ci
           format: table
@@ -145,7 +145,7 @@ jobs:
           severity: CRITICAL,HIGH
 
       - name: Varrer imagem do frontend
-        uses: aquasecurity/trivy-action@0.28.0
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
           image-ref: techx-tasks-frontend:ci
           format: table
