@@ -1,6 +1,6 @@
 # ADR-0004 - Versionamento de API e Observabilidade Inicial
 
-Status: Aceita
+Estado: Aceita
 
 Autor: Glauco Maximo <glaucomaximo@gmail.com>
 
@@ -20,9 +20,9 @@ A API original expunha rotas de tarefas sem versionamento em `/api/tasks` e um �
 ## Consequências
 
 - Consumidores podem migrar para `/api/v1/tasks` sem quebrar uso existente de `/api/tasks`.
-- Orquestradores conseguem distinguir saúde do processo de readiness do banco.
+- Orquestradores conseguem distinguir saúde do processo da prontidão do banco.
 - Logs ficam mais fáceis de correlacionar em suporte e investigação de incidentes.
-- O limite de requisições em memória é adequado para este runtime de desafio em processo único, mas uma implantação distribuída exigiria store compartilhado.
+- O limite de requisições em memória é adequado para este ambiente de desafio em processo único, mas uma implantação distribuída exigiria armazenamento compartilhado.
 
 ## Alternativas Consideradas
 

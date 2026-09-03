@@ -1,6 +1,6 @@
 # ADR-0005 - Linha de Base de CI e Cadeia de Suprimentos
 
-Status: Aceita
+Estado: Aceita
 
 Autor: Glauco Maximo <glaucomaximo@gmail.com>
 
@@ -14,7 +14,7 @@ Adicionar GitHub Actions para:
 
 - instalação determinística com `npm ci`;
 - formatação, lint, typecheck, testes e auditoria de dependências de produção;
-- build de imagens Docker para backend e frontend;
+- compilação de imagens Docker para backend e frontend;
 - análise estática com CodeQL;
 - revisão de dependências em pull requests;
 - geração de SBOM CycloneDX a partir do lockfile.
@@ -23,12 +23,12 @@ Adicionar GitHub Actions para:
 
 - Pull requests recebem feedback automatizado de qualidade e segurança.
 - SBOM é gerado como artefato de CI, em vez de ser versionado como saída gerada mutável.
-- Assinatura de imagens, attestation de provenance e promoção para registry permanecem como trabalho futuro porque dependem de política do repositório e do registry.
+- Assinatura de imagens, atestado de proveniência e promoção para registro OCI permanecem como trabalho futuro porque dependem de política do repositório e do registro.
 
 ## Alternativas Consideradas
 
 - Checks apenas manuais: rejeitado porque regressões seriam fáceis de perder.
-- Pipeline completo de implantação: adiado porque não há registry ou ambiente de destino definido.
+- Pipeline completo de implantação: adiado porque não há registro OCI ou ambiente de destino definido.
 - Implantação nativa em Kubernetes: rejeitada como desnecessária para este escopo.
 
 ## Impacto de Segurança
@@ -37,4 +37,4 @@ Positivo. Adiciona SAST, revisão de dependências, auditoria de produção e ar
 
 ## Impacto de Migração
 
-Baixo. Não há mudanças de comportamento em runtime. Mantenedores do repositório devem habilitar branch protection para exigir os checks de CI.
+Baixo. Não há mudanças de comportamento em execução. Mantenedores do repositório devem habilitar proteção de branch para exigir os checks de CI.

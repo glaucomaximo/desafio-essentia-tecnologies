@@ -1,6 +1,6 @@
 # ADR-0001 - Monólito Modular
 
-Status: Aceita
+Estado: Aceita
 
 Autor: Glauco Maximo <glaucomaximo@gmail.com>
 

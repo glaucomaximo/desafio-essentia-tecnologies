@@ -48,7 +48,7 @@ const positiveNumberFromEnv = (name: string, fallback: number): number => {
 
 export const env = {
   serviceName: process.env.SERVICE_NAME ?? "techx-tasks-api",
-  version: process.env.APP_VERSION ?? process.env.npm_package_version ?? "1.0.0",
+  version: process.env.APP_VERSION ?? process.env.npm_package_version ?? "1.1.0",
   nodeEnv: process.env.NODE_ENV ?? "development",
   logLevel: process.env.LOG_LEVEL ?? "info",
   port: numberFromEnv("PORT", 3333),

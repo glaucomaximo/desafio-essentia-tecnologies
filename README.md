@@ -15,7 +15,7 @@ Arquitetura atual: monólito modular com dois processos.
 
 - `frontend`: Angular 22 servido por Nginx sem privilégios de root.
 - `backend`: Node.js 24, TypeScript, Express 5 e MySQL.
-- `database`: esquema MySQL inicial em `database/init.sql`.
+- `banco`: esquema MySQL inicial em `database/init.sql`.
 
 Fluxo principal:
 
@@ -56,7 +56,7 @@ cp backend/.env.example backend/.env
 Suba apenas o MySQL pelo Compose:
 
 ```bash
-docker compose up -d mysql
+npm run docker -- compose up -d mysql
 ```
 
 Execute a API:
@@ -75,8 +75,8 @@ URLs locais:
 
 - Frontend: `http://localhost:4200`
 - API: `http://localhost:3333`
-- Liveness: `http://localhost:3333/liveness`
-- Readiness: `http://localhost:3333/readiness`
+- Vivacidade: `http://localhost:3333/liveness`
+- Prontidão: `http://localhost:3333/readiness`
 
 ## Desenvolvimento com Containers
 
@@ -84,22 +84,30 @@ O caminho principal de avaliação e execução é Docker Compose:
 
 ```bash
 cp .env.example .env
-docker compose up --build
+npm run docker:up
+```
+
+O projeto inclui um wrapper para Docker em `scripts/docker-cli.mjs`. Ele usa `docker` do PATH quando disponível e, no Windows, também localiza o Docker Desktop instalado em `%LOCALAPPDATA%\Programs\DockerDesktop\resources\bin`. Isso evita falha de auxiliares como `docker-credential-desktop` quando o Docker Desktop existe, mas o CLI não foi adicionado ao PATH global.
+
+Para validar a configuração final do Compose:
+
+```bash
+npm run docker:config
 ```
 
 Parar containers:
 
 ```bash
-docker compose down
+npm run docker:down
 ```
 
 Remover também o volume local do MySQL:
 
 ```bash
-docker compose down -v
+npm run docker -- compose down -v
 ```
 
-As imagens usam build multiestágio, runtime sem root, healthchecks e configuração externa por variáveis de ambiente.
+As imagens usam compilação multiestágio, execução sem root, verificações de saúde e configuração externa por variáveis de ambiente.
 
 ## Configuração
 
@@ -109,7 +117,7 @@ Variáveis principais:
 
 | Variável                  | Descrição                                | Valor local padrão      |
 | ------------------------- | ---------------------------------------- | ----------------------- |
-| `APP_VERSION`             | Versão SemVer exposta nos healthchecks   | `1.0.0`                 |
+| `APP_VERSION`             | Versão SemVer exposta nas rotas de saúde | `1.1.0`                 |
 | `SERVICE_NAME`            | Nome do serviço nos logs                 | `techx-tasks-api`       |
 | `PORT`                    | Porta interna da API                     | `3333`                  |
 | `CORS_ORIGIN`             | Origem permitida para o frontend         | `http://localhost:4200` |
@@ -180,7 +188,7 @@ Controles atuais:
 - Logs JSON com redação de chaves sensíveis.
 - `X-Request-ID` para correlação.
 - Containers sem usuário root.
-- CI com auditoria de dependências, varredura de padrões de segredo, CodeQL, revisão de dependências, build de imagens e SBOM.
+- CI com auditoria de dependências, varredura de padrões de segredo, CodeQL, revisão de dependências, compilação de imagens e SBOM.
 
 Leia `SECURITY.md` antes de reportar ou tratar vulnerabilidades.
 
@@ -218,16 +226,17 @@ O projeto segue o princípio: construir uma vez, testar uma vez, assinar uma vez
 Fluxo recomendado:
 
 ```text
-commit -> CI -> testes/segurança -> build OCI -> scan de container -> SBOM -> registry -> homologação -> produção
+commit -> CI -> testes/segurança -> compilação OCI -> varredura de container -> SBOM -> registro OCI -> homologação -> produção
 ```
 
 Não coloque segredos em Dockerfiles, Compose ou workflows. Use variáveis protegidas do ambiente de destino.
 
 ## Solução de Problemas
 
-- `docker` não encontrado: instale Docker Desktop ou outro runtime OCI compatível e valide `docker compose version`.
-- MySQL não inicia: confira `MYSQL_PORT` e logs com `docker compose logs mysql`.
-- API sem readiness: confira `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD` e `DB_NAME`.
+- `docker` não encontrado: valide com `npm run docker -- --version`; se falhar, instale Docker Desktop ou outro ambiente de execução OCI compatível.
+- Docker Desktop instalado, mas fora do PATH: use os scripts `npm run docker:*` ou defina `DOCKER_CLI` com o caminho absoluto do executável.
+- MySQL não inicia: confira `MYSQL_PORT` e logs com `npm run docker -- compose logs mysql`.
+- API sem prontidão: confira `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD` e `DB_NAME`.
 - Frontend não chama API: confira `CORS_ORIGIN`, proxy do Nginx e `frontend/proxy.conf.json`.
 - Porta ocupada: altere `API_PORT`, `FRONTEND_PORT` ou `MYSQL_PORT` no `.env`.
 

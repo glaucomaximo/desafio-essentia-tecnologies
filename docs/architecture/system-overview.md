@@ -26,7 +26,7 @@ Navegador
 ## Módulos do Backend
 
 - `config`: configuração orientada por variáveis de ambiente.
-- `db`: pool MySQL, readiness de banco e bootstrap idempotente de esquema.
+- `db`: pool MySQL, prontidão de banco e inicialização idempotente de esquema.
 - `errors`: modelo de erro HTTP.
 - `middleware`: tratamento assíncrono, erros, contexto de requisição e limite de requisições.
 - `repositories`: adaptador de persistência SQL para tarefas.
@@ -51,7 +51,7 @@ id, title, description, completed, createdAt, updatedAt
 - `/health` é preservado como endpoint legado leve.
 - Logs são emitidos como linhas JSON em stdout/stderr.
 - Cada requisição recebe o cabeçalho de resposta `X-Request-ID`.
-- Docker Compose é o runtime local recomendado.
+- Docker Compose é o ambiente de execução local recomendado.
 
 ## Modelo de Segurança
 

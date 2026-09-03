@@ -4,18 +4,18 @@ Autor: Glauco Maximo <glaucomaximo@gmail.com>
 
 ## Estratégia
 
-Modernização incremental, rastreável e reversível. O sistema é pequeno e deve permanecer como monólito modular. Mudanças devem preservar o CRUD de tarefas e validar build/testes após cada etapa relevante.
+Modernização incremental, rastreável e reversível. O sistema é pequeno e deve permanecer como monólito modular. Mudanças devem preservar o CRUD de tarefas e validar compilação/testes após cada etapa relevante.
 
 ## Fase 0 - Linha de Base
 
 Objetivo: entender o sistema, registrar riscos e garantir que o comportamento atual seja conhecido.
 
-Status: concluída nesta rodada.
+Estado: concluída nesta rodada.
 
 Entregas:
 
 - Mapeamento de linguagens, frameworks, versões e entrypoints.
-- Linha de base de build, typecheck, testes e auditoria de dependências.
+- Linha de base de compilação, typecheck, testes e auditoria de dependências.
 - `docs/modernization/legacy-assessment.md`.
 - ADRs iniciais em `docs/adr/`.
 
@@ -23,7 +23,7 @@ Entregas:
 
 Objetivo: reduzir vulnerabilidades conhecidas sem alterar comportamento funcional.
 
-Status: concluída para dependências de runtime.
+Estado: concluída para dependências de produção.
 
 Entregas:
 
@@ -36,13 +36,13 @@ Entregas:
 
 Pendência:
 
-- Auditoria completa ainda possui vulnerabilidades moderadas dev-only no toolchain Angular atual.
+- Auditoria completa ainda possui vulnerabilidades moderadas restritas ao desenvolvimento no ferramental Angular atual.
 
 ## Fase 2 - Qualidade Estrutural
 
 Objetivo: introduzir controles de qualidade sem overengineering.
 
-Status: concluída para baseline.
+Estado: concluída para linha de base.
 
 Entregas:
 
@@ -56,24 +56,24 @@ Entregas:
 
 Objetivo: cobrir comportamento relevante e contratos de API.
 
-Status: concluída para linha de base de backend/API.
+Estado: concluída para linha de base de backend/API.
 
 Entregas:
 
 - Testes unitários de validação preservados.
 - Testes HTTP com `supertest`.
-- Caracterização de liveness, readiness, listagem, criação, alias legado, erros 400 e limite de requisições.
+- Caracterização de vivacidade, prontidão, listagem, criação, alias legado, erros 400 e limite de requisições.
 
 Pendências:
 
-- Teste de integração com MySQL quando Docker estiver disponível.
+- Automatizar teste de integração com MySQL em CI usando Docker Compose.
 - Testes de frontend se a interface crescer.
 
 ## Fase 4 - Segurança
 
 Objetivo: aplicar security by default no escopo real do sistema.
 
-Status: linha de base concluída.
+Estado: linha de base concluída.
 
 Entregas:
 
@@ -81,7 +81,7 @@ Entregas:
 - Limite de body preservado e configurável.
 - Tratamento 400 para JSON inválido.
 - Logs com redação de chaves sensíveis.
-- `.env.example` documentado como dev-only.
+- `.env.example` documentado como exclusivo de desenvolvimento.
 - `SECURITY.md`.
 - Varredura de padrões de segredo no CI.
 
@@ -93,44 +93,45 @@ Pendência:
 
 Objetivo: manter Container/OCI-first.
 
-Status: implementada, validação local bloqueada por ambiente.
+Estado: implementada e validada localmente.
 
 Entregas:
 
 - Dockerfiles com Node 24.15.0.
-- Builds multiestágio.
+- Compilações multiestágio.
 - Execução sem root.
-- Healthchecks alinhados a `/readiness` e `/health`.
+- Verificações de saúde alinhadas a `/readiness` e `/health`.
 - Configuração externa por variáveis de ambiente.
 - Persistência via volume MySQL.
+- Wrapper `npm run docker` para localizar Docker Desktop no Windows quando o CLI não está no PATH.
+- `npm run docker -- compose up --build -d` validado localmente com containers saudáveis.
 
 Pendências:
 
-- Validar `docker compose up --build` quando Docker estiver instalado.
 - Avaliar pinning por digest em política de release.
 
 ## Fase 6 - CI/CD e Cadeia de Suprimentos
 
 Objetivo: automatizar qualidade e rastreabilidade.
 
-Status: linha de base concluída.
+Estado: linha de base concluída.
 
 Entregas:
 
-- GitHub Actions para formatação, lint, typecheck, testes, auditoria, varredura de segredo, SBOM, CodeQL, revisão de dependências, build OCI e Trivy scan.
+- GitHub Actions para formatação, lint, typecheck, testes, auditoria, varredura de segredo, SBOM, CodeQL, revisão de dependências, compilação OCI e varredura Trivy.
 - Dependabot para npm, Docker e GitHub Actions.
 - SBOM CycloneDX via `npm run sbom`.
 
 Pendências:
 
-- Assinatura de imagens e provenance quando houver registry e política definidos.
-- Branch protection no GitHub para exigir checks.
+- Assinatura de imagens e proveniência quando houver registro OCI e política definidos.
+- Proteção de branch no GitHub para exigir checks.
 
 ## Fase 7 - Observabilidade
 
 Objetivo: tornar operação e troubleshooting mais previsíveis.
 
-Status: linha de base concluída.
+Estado: linha de base concluída.
 
 Entregas:
 
@@ -140,13 +141,13 @@ Entregas:
 
 Pendências:
 
-- Métricas e tracing OpenTelemetry se houver operação real ou deploy distribuído.
+- Métricas e rastreamento OpenTelemetry se houver operação real ou implantação distribuída.
 
 ## Fase 8 - Documentação e Governança
 
 Objetivo: deixar o projeto compreensível e auditável.
 
-Status: linha de base concluída.
+Estado: linha de base concluída.
 
 Entregas:
 
@@ -162,12 +163,11 @@ Entregas:
 
 ## Backlog Priorizado
 
-- P0: instalar/ativar Docker local ou validar Compose em CI antes de release.
 - P1: adicionar teste de integração com MySQL em container.
-- P1: habilitar branch protection exigindo CI.
-- P1: definir registry OCI, política de tags SemVer, pinning por digest, assinatura e provenance.
-- P2: acompanhar release do Angular build tooling para remover vulnerabilidades moderadas dev-only restantes.
+- P1: habilitar proteção de branch exigindo CI.
+- P1: definir registro OCI, política de tags SemVer, pinning por digest, assinatura e proveniência.
+- P2: acompanhar release do ferramental Angular para remover vulnerabilidades moderadas restritas ao desenvolvimento restantes.
 - P2: introduzir histórico de migrações se o esquema evoluir.
 - P2: adicionar testes de frontend para interações principais.
 - P3: adicionar autenticação/autorização somente se houver requisito multiusuário.
-- P3: adicionar métricas/tracing OpenTelemetry se houver operação em ambiente compartilhado.
+- P3: adicionar métricas/rastreamento OpenTelemetry se houver operação em ambiente compartilhado.

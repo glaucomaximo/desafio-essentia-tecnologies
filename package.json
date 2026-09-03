@@ -1,6 +1,6 @@
 {
   "name": "desafio-essentia-tecnologies",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "private": true,
   "description": "Aplicação fullstack de gerenciamento de tarefas para o desafio Essentia Group.",
   "author": "Glauco Maximo <glaucomaximo@gmail.com>",
@@ -14,9 +14,11 @@
     "npm": ">=11"
   },
   "scripts": {
-    "docker:up": "docker compose up --build",
-    "docker:down": "docker compose down",
-    "docker:logs": "docker compose logs -f",
+    "docker": "node scripts/docker-cli.mjs",
+    "docker:config": "node scripts/docker-cli.mjs compose config",
+    "docker:up": "node scripts/docker-cli.mjs compose up --build",
+    "docker:down": "node scripts/docker-cli.mjs compose down",
+    "docker:logs": "node scripts/docker-cli.mjs compose logs -f",
     "dev:backend": "npm --workspace backend run dev",
     "dev:frontend": "npm --workspace frontend run start",
     "format": "prettier --write .",

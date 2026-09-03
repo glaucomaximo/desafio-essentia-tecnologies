@@ -17,10 +17,10 @@ Diretrizes aplicadas neste projeto para manter uma entrega alinhada a práticas 
 ## Operação
 
 - Docker Compose como fluxo recomendado de execução.
-- Containers de aplicação com builds multiestágio para reduzir superfície de runtime.
+- Containers de aplicação com compilações multiestágio para reduzir superfície de execução.
 - Backend executando com usuário sem root dentro do container.
 - Frontend servido por Nginx sem privilégios de root.
-- Healthchecks para MySQL, backend e frontend.
+- Verificações de saúde para MySQL, backend e frontend.
 - `/liveness` para processo e `/readiness` para dependência de banco.
 - Configuração externa via variáveis de ambiente, com `.env.example` versionado.
 - Shutdown gracioso no backend para encerrar servidor HTTP e pool do MySQL.
@@ -31,15 +31,15 @@ Diretrizes aplicadas neste projeto para manter uma entrega alinhada a práticas 
 - CORS configurável por ambiente.
 - SQL parametrizado via `mysql2`.
 - Limite de requisições configurável para rotas `/api`.
-- Limite de body JSON configurável.
+- Limite de corpo JSON configurável.
 - Logs estruturados com redação de chaves sensíveis.
-- `.dockerignore` para reduzir contexto de build.
-- `.gitignore` para manter credenciais, dependências, builds e SBOM local fora do versionamento.
+- `.dockerignore` para reduzir contexto de compilação.
+- `.gitignore` para manter credenciais, dependências, compilações e SBOM local fora do versionamento.
 - `npm audit --omit=dev` como controle de release.
 
 ## Qualidade
 
-- Builds reprodutíveis com `package-lock.json` e `npm ci`.
+- Compilações reprodutíveis com `package-lock.json` e `npm ci`.
 - Prettier para formatação.
 - ESLint para análise estática.
 - `npm run typecheck`, `npm test` e `npm run build` como controles locais.
@@ -49,6 +49,6 @@ Diretrizes aplicadas neste projeto para manter uma entrega alinhada a práticas 
 ## Cadeia de Suprimentos
 
 - SBOM CycloneDX gerado por `npm run sbom`.
-- CI com CodeQL, revisão de dependências, varredura de padrões de segredo, build de imagens e Trivy scan.
+- CI com CodeQL, revisão de dependências, varredura de padrões de segredo, compilação de imagens e varredura Trivy.
 - Dependabot para npm, Docker e GitHub Actions.
-- Assinatura e provenance devem ser adicionadas quando houver registry e política de release definidos.
+- Assinatura e proveniência devem ser adicionadas quando houver registro OCI e política de release definidos.

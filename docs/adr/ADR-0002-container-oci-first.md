@@ -1,6 +1,6 @@
-# ADR-0002 - Container OCI First
+# ADR-0002 - Container/OCI como Padrão
 
-Status: Aceita
+Estado: Aceita
 
 Autor: Glauco Maximo <glaucomaximo@gmail.com>
 
@@ -10,22 +10,22 @@ O desafio exige um ambiente fullstack reprodutível com MySQL, backend e fronten
 
 ## Decisão
 
-Usar Docker Compose para orquestração local e Dockerfiles compatíveis com OCI, com builds multiestágio, usuários de runtime sem root quando possível, configuração externa e healthchecks.
+Usar Docker Compose para orquestração local e Dockerfiles compatíveis com OCI, com compilações multiestágio, usuários de execução sem root quando possível, configuração externa e verificações de saúde.
 
 ## Consequências
 
 - Avaliadores podem executar a stack com um comando quando Docker estiver instalado.
-- Imagens de runtime evitam dependências de desenvolvimento.
+- Imagens de execução evitam dependências de desenvolvimento.
 - Estado persistente permanece em volume de banco de dados, não nos containers da aplicação.
 
 ## Alternativas Consideradas
 
-- Setup apenas no host: mantido como modo secundário de desenvolvimento, mas não como padrão.
+- Configuração apenas no host: mantida como modo secundário de desenvolvimento, mas não como padrão.
 - Kubernetes: rejeitado como desnecessário para o tamanho do projeto.
 
 ## Impacto de Segurança
 
-Imagens evitam segredos embutidos e reduzem privilégios de runtime.
+Imagens evitam segredos embutidos e reduzem privilégios de execução.
 
 ## Impacto de Migração
 

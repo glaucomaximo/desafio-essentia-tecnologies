@@ -6,25 +6,31 @@ Autor: Glauco Maximo <glaucomaximo@gmail.com>
 
 ```bash
 cp .env.example .env
-docker compose up --build
+npm run docker:up
+```
+
+Se precisar passar argumentos diretamente ao Compose:
+
+```bash
+npm run docker -- compose ps
 ```
 
 Endpoints esperados:
 
 - Frontend: `http://localhost:4200`
-- Liveness da API: `http://localhost:3333/liveness`
-- Readiness da API: `http://localhost:3333/readiness`
+- Vivacidade da API: `http://localhost:3333/liveness`
+- Prontidão da API: `http://localhost:3333/readiness`
 
 ## Parar
 
 ```bash
-docker compose down
+npm run docker:down
 ```
 
 Remova o estado local do MySQL apenas quando ele for descartável:
 
 ```bash
-docker compose down -v
+npm run docker -- compose down -v
 ```
 
 ## Validar Localmente
@@ -49,7 +55,8 @@ O arquivo `sbom.cdx.json` gerado é um artefato local ou de release e é ignorad
 
 ## Falhas Comuns
 
-- MySQL não está pronto: verifique `docker compose logs mysql` e aguarde o healthcheck passar.
-- Readiness do backend falhando: verifique `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD` e `DB_NAME`.
+- Docker fora do PATH no Windows: use `npm run docker -- --version`; o wrapper local procura o Docker Desktop instalado no perfil do usuário.
+- MySQL não está pronto: verifique `npm run docker -- compose logs mysql` e aguarde a verificação de saúde passar.
+- Prontidão do backend falhando: verifique `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD` e `DB_NAME`.
 - Chamadas de API do frontend falhando: verifique `CORS_ORIGIN` e o proxy `/api` do Nginx.
 - Conflito de porta: altere `MYSQL_PORT`, `API_PORT` ou `FRONTEND_PORT` no `.env`.
