@@ -119,7 +119,7 @@ Estado: linha de base concluída.
 Entregas:
 
 - GitHub Actions para formatação, lint, typecheck, testes, auditoria, varredura de segredo, SBOM, CodeQL, revisão de dependências, compilação OCI e varredura Trivy.
-- Dependabot para npm, Docker e GitHub Actions.
+- Atualizações de dependências revisadas manualmente durante a submissão do desafio.
 - SBOM CycloneDX via `npm run sbom`.
 
 Pendências:

@@ -94,7 +94,7 @@ Autor: Glauco Maximo <glaucomaximo@gmail.com>
 
 - GitHub Actions em `.github/workflows/ci.yml`.
 - Controles de qualidade: instalação determinística, format-check, lint, typecheck, testes, auditoria de produção, varredura de padrões de segredo, SBOM, CodeQL, revisão de dependências, compilação OCI e varredura de container.
-- Dependabot configurado para npm, Docker e GitHub Actions.
+- Atualizações de dependências devem ser revisadas manualmente durante a submissão do desafio.
 - SBOM CycloneDX gerado por `npm run sbom` a partir do lockfile.
 - Proveniência e assinatura de artefatos ainda dependem de registro OCI/política de release.
 

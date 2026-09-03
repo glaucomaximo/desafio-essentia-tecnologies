@@ -4,6 +4,18 @@ Todas as alterações relevantes deste projeto são documentadas aqui.
 
 Autor: Glauco Maximo <glaucomaximo@gmail.com>
 
+## [1.1.1] - 2026-09-03
+
+### Alterado
+
+- Removida automação de atualização de dependências para manter o ciclo de vida da submissão aderente ao desafio.
+- Documentação ajustada para tratar atualizações de dependências como revisão manual e rastreável.
+- Padronizada a normalização de fim de linha do repositório.
+
+### Validado
+
+- Branch local de publicação reconstruída com commits incrementais e sem commits de automações no caminho.
+
 ## [1.1.0] - 2026-09-03
 
 ### Adicionado

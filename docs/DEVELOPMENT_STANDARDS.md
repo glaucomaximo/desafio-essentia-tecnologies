@@ -50,5 +50,5 @@ Diretrizes aplicadas neste projeto para manter uma entrega alinhada a práticas 
 
 - SBOM CycloneDX gerado por `npm run sbom`.
 - CI com CodeQL, revisão de dependências, varredura de padrões de segredo, compilação de imagens e varredura Trivy.
-- Dependabot para npm, Docker e GitHub Actions.
+- Atualizações de dependências devem ser propostas, revisadas e versionadas manualmente durante a submissão do desafio.
 - Assinatura e proveniência devem ser adicionadas quando houver registro OCI e política de release definidos.
