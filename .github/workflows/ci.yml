@@ -59,7 +59,7 @@ jobs:
         run: npm run sbom
 
       - name: Publicar SBOM
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: cyclonedx-sbom
           path: sbom.cdx.json
