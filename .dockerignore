@@ -1,0 +1,14 @@
+.git
+.github
+node_modules
+**/node_modules
+**/dist
+**/.angular
+.runtime
+.env
+*.log
+npm-debug.log*
+Dockerfile
+docker-compose*.yml
+README.md
+docs
