@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: API TechX Tasks
-  version: 1.1.3
+  version: 2.0.0
   description: API REST para o desafio fullstack da Essentia Group.
   contact:
     name: Glauco Maximo
@@ -10,55 +10,125 @@ servers:
   - url: http://localhost:3333
     description: Desenvolvimento local
 tags:
-  - name: Saúde
+  - name: Saude
+  - name: Autenticacao
   - name: Tarefas
 paths:
   /liveness:
     get:
-      tags: [Saúde]
+      tags: [Saude]
       summary: Liveness do processo
       responses:
         "200":
-          description: O processo da API está vivo.
+          description: O processo da API esta vivo.
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
   /readiness:
     get:
-      tags: [Saúde]
-      summary: Readiness do serviço
+      tags: [Saude]
+      summary: Readiness do servico
       responses:
         "200":
-          description: API e banco de dados estão prontos.
+          description: API, MySQL e MongoDB estao prontos.
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
         "500":
-          description: Falha na checagem de dependência.
+          description: Falha na checagem de dependencia.
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
   /health:
     get:
-      tags: [Saúde]
-      summary: Endpoint legado de saúde
+      tags: [Saude]
+      summary: Endpoint legado de saude
       responses:
         "200":
-          description: Resposta leve de saúde para compatibilidade.
+          description: Resposta leve de saude para compatibilidade.
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+  /api/v1/auth/register:
+    post:
+      tags: [Autenticacao]
+      summary: Criar usuario
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegisterRequest"
+      responses:
+        "201":
+          description: Usuario criado e sessao JWT iniciada.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthSession"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+  /api/v1/auth/login:
+    post:
+      tags: [Autenticacao]
+      summary: Entrar
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginRequest"
+      responses:
+        "200":
+          description: Sessao JWT iniciada.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthSession"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+  /api/v1/auth/me:
+    get:
+      tags: [Autenticacao]
+      summary: Consultar usuario autenticado
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Usuario autenticado.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [user]
+                properties:
+                  user:
+                    $ref: "#/components/schemas/AuthenticatedUser"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
   /api/v1/tasks:
     get:
       tags: [Tarefas]
       summary: Listar tarefas
+      security:
+        - bearerAuth: []
       responses:
         "200":
-          description: Lista ordenada de tarefas.
+          description: Lista ordenada de tarefas do usuario autenticado.
           headers:
             X-Request-ID:
               $ref: "#/components/headers/RequestId"
@@ -68,11 +138,15 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/Task"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
         "429":
           $ref: "#/components/responses/TooManyRequests"
     post:
       tags: [Tarefas]
       summary: Criar tarefa
+      security:
+        - bearerAuth: []
       requestBody:
         required: true
         content:
@@ -91,6 +165,8 @@ paths:
                 $ref: "#/components/schemas/Task"
         "400":
           $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
         "429":
           $ref: "#/components/responses/TooManyRequests"
   /api/v1/tasks/{id}:
@@ -104,6 +180,8 @@ paths:
     get:
       tags: [Tarefas]
       summary: Buscar tarefa
+      security:
+        - bearerAuth: []
       responses:
         "200":
           description: Tarefa encontrada.
@@ -113,11 +191,15 @@ paths:
                 $ref: "#/components/schemas/Task"
         "400":
           $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
         "404":
           $ref: "#/components/responses/NotFound"
     put:
       tags: [Tarefas]
       summary: Atualizar tarefa
+      security:
+        - bearerAuth: []
       requestBody:
         required: true
         content:
@@ -133,11 +215,15 @@ paths:
                 $ref: "#/components/schemas/Task"
         "400":
           $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
         "404":
           $ref: "#/components/responses/NotFound"
     patch:
       tags: [Tarefas]
       summary: Atualizar tarefa parcialmente
+      security:
+        - bearerAuth: []
       requestBody:
         required: true
         content:
@@ -153,39 +239,62 @@ paths:
                 $ref: "#/components/schemas/Task"
         "400":
           $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
         "404":
           $ref: "#/components/responses/NotFound"
     delete:
       tags: [Tarefas]
       summary: Remover tarefa
+      security:
+        - bearerAuth: []
       responses:
         "204":
           description: Tarefa removida.
         "400":
           $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
         "404":
           $ref: "#/components/responses/NotFound"
 components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
   headers:
     RequestId:
-      description: Identificador de correlação da requisição.
+      description: Identificador de correlacao da requisicao.
       schema:
         type: string
   responses:
     BadRequest:
-      description: Requisição inválida.
+      description: Requisicao invalida.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    Unauthorized:
+      description: Autenticacao ausente ou invalida.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    Conflict:
+      description: Conflito com o estado atual do recurso.
       content:
         application/json:
           schema:
             $ref: "#/components/schemas/ErrorResponse"
     NotFound:
-      description: Recurso não encontrado.
+      description: Recurso nao encontrado.
       content:
         application/json:
           schema:
             $ref: "#/components/schemas/ErrorResponse"
     TooManyRequests:
-      description: Limite de requisições excedido.
+      description: Limite de requisicoes excedido.
       content:
         application/json:
           schema:
@@ -202,9 +311,65 @@ components:
           type: string
         version:
           type: string
+    AuthenticatedUser:
+      type: object
+      required: [id, name, email]
+      properties:
+        id:
+          type: integer
+          minimum: 1
+        name:
+          type: string
+          minLength: 2
+          maxLength: 120
+        email:
+          type: string
+          format: email
+          maxLength: 254
+    AuthSession:
+      type: object
+      required: [token, expiresAt, user]
+      properties:
+        token:
+          type: string
+        expiresAt:
+          type: string
+          format: date-time
+        user:
+          $ref: "#/components/schemas/AuthenticatedUser"
+    RegisterRequest:
+      type: object
+      required: [name, email, password]
+      properties:
+        name:
+          type: string
+          minLength: 2
+          maxLength: 120
+        email:
+          type: string
+          format: email
+          maxLength: 254
+        password:
+          type: string
+          minLength: 8
+          maxLength: 128
+      additionalProperties: true
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          format: email
+          maxLength: 254
+        password:
+          type: string
+          minLength: 8
+          maxLength: 128
+      additionalProperties: true
     Task:
       type: object
-      required: [id, title, description, completed, createdAt, updatedAt]
+      required: [id, title, description, completed, metadata, createdAt, updatedAt]
       properties:
         id:
           type: integer
@@ -218,12 +383,40 @@ components:
             - "null"
         completed:
           type: boolean
+        metadata:
+          $ref: "#/components/schemas/TaskMetadata"
         createdAt:
           type: string
           format: date-time
         updatedAt:
           type: string
           format: date-time
+    TaskMetadata:
+      type: object
+      required: [priority, dueDate, tags, notes]
+      properties:
+        priority:
+          type: string
+          enum: [low, medium, high]
+          default: medium
+        dueDate:
+          type:
+            - string
+            - "null"
+          format: date
+        tags:
+          type: array
+          maxItems: 10
+          uniqueItems: true
+          items:
+            type: string
+            minLength: 1
+            maxLength: 40
+        notes:
+          type:
+            - string
+            - "null"
+          maxLength: 1000
     CreateTaskRequest:
       type: object
       required: [title]
@@ -239,6 +432,8 @@ components:
         completed:
           type: boolean
           default: false
+        metadata:
+          $ref: "#/components/schemas/TaskMetadata"
       additionalProperties: true
     UpdateTaskRequest:
       type: object
@@ -253,6 +448,8 @@ components:
             - "null"
         completed:
           type: boolean
+        metadata:
+          $ref: "#/components/schemas/TaskMetadata"
       minProperties: 1
       additionalProperties: true
     ErrorResponse:

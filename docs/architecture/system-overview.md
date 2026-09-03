@@ -1,70 +1,80 @@
-# Visão Geral do Sistema
+# Visao Geral do Sistema
 
 Autor: Glauco Maximo <glaucomaximo@gmail.com>
 
 ## Contexto
 
-TechX Tasks é uma pequena aplicação fullstack de gerenciamento de tarefas criada para o desafio Essentia Group. O sistema expõe uma API REST consumida por uma aplicação Angular de página única e persiste tarefas em MySQL.
+TechX Tasks e uma aplicacao fullstack de gerenciamento de tarefas criada para o desafio Essentia Group. O sistema expoe uma API REST consumida por uma aplicacao Angular de pagina unica, autentica usuarios com JWT e persiste dados em MySQL e MongoDB.
 
 ## Estilo Arquitetural
 
-A arquitetura atual é um monólito modular dividido em dois processos implantáveis:
+A arquitetura atual permanece como monolito modular dividido em dois processos implantaveis:
 
-- `frontend`: SPA Angular servida por Nginx sem privilégios de root.
+- `frontend`: SPA Angular servida por Nginx sem privilegios de root.
 - `backend`: API Express em Node.js/TypeScript.
 
-O MySQL é uma dependência externa com estado e não fica embutido nas imagens da aplicação.
+MySQL e MongoDB sao dependencias externas com estado e nao ficam embutidos nas imagens da aplicacao.
 
 ```text
 Navegador
   -> container frontend/Nginx
   -> proxy /api
   -> container API/Express
-  -> container MySQL ou MySQL gerenciado
+  -> MySQL para usuarios e tarefas
+  -> MongoDB para metadados adicionais
 ```
 
-## Módulos do Backend
+## Modulos do Backend
 
-- `config`: configuração orientada por variáveis de ambiente.
-- `db`: pool MySQL, prontidão de banco e inicialização idempotente de esquema.
+- `auth`: assinatura e verificacao JWT, hash de senha com `scrypt`.
+- `config`: configuracao orientada por variaveis de ambiente.
+- `db`: conexoes MySQL/MongoDB, prontidao e migracoes idempotentes.
 - `errors`: modelo de erro HTTP.
-- `middleware`: tratamento assíncrono, erros, contexto de requisição e limite de requisições.
-- `repositories`: adaptador de persistência SQL para tarefas.
-- `routes`: interface HTTP do recurso de tarefas.
-- `schemas`: validação e normalização de payloads.
-- `shared`: utilitários transversais, como logging estruturado.
+- `middleware`: tratamento assincrono, autenticacao, erros, contexto de requisicao e limite de requisicoes.
+- `repositories`: adaptadores de persistencia para usuarios, tarefas e metadados.
+- `routes`: interfaces HTTP de autenticacao e tarefas.
+- `schemas`: validacao e normalizacao de payloads.
+- `services`: casos de uso de autenticacao e tarefas.
+- `shared`: utilitarios transversais, como logging estruturado.
 
 ## Limites da API
 
-A rota canônica da API é `/api/v1/tasks`. A rota anterior `/api/tasks` permanece disponível como alias de compatibilidade.
+A rota canonica da API e `/api/v1`. A rota anterior `/api/tasks` permanece disponivel como alias de compatibilidade, agora protegida por JWT como a rota canonica.
 
-As respostas preservam o formato público de tarefa:
+As tarefas preservam o contrato principal e adicionam `metadata`:
 
 ```text
-id, title, description, completed, createdAt, updatedAt
+id, title, description, completed, metadata, createdAt, updatedAt
 ```
+
+## Modelo de Dados
+
+- MySQL `users`: identidade local, e-mail unico e hash de senha.
+- MySQL `tasks`: dados principais da tarefa e `owner_user_id`.
+- MongoDB `task_metadata`: prioridade, prazo, etiquetas e observacoes por par usuario/tarefa.
+
+Tarefas antigas em bancos ja existentes recebem `owner_user_id` nulo durante a migracao progressiva. Elas nao ficam visiveis nas rotas autenticadas ate serem associadas a um usuario por decisao operacional explicita.
 
 ## Modelo Operacional
 
-- `/liveness` confirma que o processo da API está vivo.
-- `/readiness` valida disponibilidade do banco de dados.
-- `/health` é preservado como endpoint legado leve.
-- Logs são emitidos como linhas JSON em stdout/stderr.
-- Cada requisição recebe o cabeçalho de resposta `X-Request-ID`.
-- Docker Compose é o ambiente de execução local recomendado.
+- `/liveness` confirma que o processo da API esta vivo.
+- `/readiness` valida disponibilidade de MySQL e MongoDB.
+- `/health` e preservado como endpoint legado leve.
+- Logs sao emitidos como linhas JSON em stdout/stderr.
+- Cada requisicao recebe o cabecalho de resposta `X-Request-ID`.
+- Docker Compose e o ambiente de execucao local recomendado.
 
-## Modelo de Segurança
+## Modelo de Seguranca
 
-O escopo atual do desafio não possui usuários, papéis ou autenticação. Os controles de segurança focam em padrões seguros:
+- Cadastro e login retornam JWT assinado com HS256.
+- `JWT_SECRET` e obrigatorio em producao e deve ter no minimo 32 caracteres.
+- Senhas sao armazenadas com `scrypt`, sal aleatorio e comparacao em tempo constante.
+- Rotas de tarefas exigem `Authorization: Bearer <token>`.
+- Consultas e mutacoes de tarefas filtram por `owner_user_id` no servidor.
+- Metadados no MongoDB usam indice unico por `ownerUserId` e `taskId`.
+- Cabeçalhos de seguranca via Helmet, CORS configurado por ambiente e limite de corpo JSON permanecem ativos.
+- Containers executam sem usuario root e recebem configuracao por variaveis de ambiente.
 
-- Cabeçalhos de segurança via Helmet.
-- CORS configurado por ambiente.
-- Limite de corpo JSON.
-- SQL parametrizado.
-- Limite de requisições na API.
-- Containers sem usuário root.
-- Nenhum segredo embutido nas imagens.
+## Caminho de Evolucao
 
-## Caminho de Evolução
-
-Se o domínio crescer, introduza uma camada de serviço de aplicação antes de adicionar mais endpoints. Mantenha o sistema como monólito modular, salvo quando escala independente, cadência distinta de implantação ou isolamento de falhas justificarem extração de serviços.
+O sistema deve continuar como monolito modular enquanto o dominio permanecer pequeno. Extraia servicos somente se houver justificativa objetiva, como escala independente, ciclos distintos de implantacao ou isolamento operacional real.

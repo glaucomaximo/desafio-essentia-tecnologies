@@ -62,7 +62,7 @@ Entregas:
 
 - Testes unitários de validação preservados.
 - Testes HTTP com `supertest`.
-- Caracterização de vivacidade, prontidão, listagem, criação, alias legado, erros 400 e limite de requisições.
+- Caracterização de vivacidade, prontidão, autenticação JWT, listagem autenticada, criação com metadados, isolamento por usuário, alias legado, erros 400/401 e limite de requisições.
 
 Pendências:
 
@@ -73,10 +73,13 @@ Pendências:
 
 Objetivo: aplicar security by default no escopo real do sistema.
 
-Estado: linha de base concluída.
+Estado: linha de base concluída e desafio extra JWT implementado em `2.0.0`.
 
 Entregas:
 
+- Cadastro e login com JWT.
+- Hash de senha com `scrypt`, sal aleatório e comparação em tempo constante.
+- Isolamento server-side de tarefas por usuário autenticado.
 - Limite de requisições configurável.
 - Limite de body preservado e configurável.
 - Tratamento 400 para JSON inválido.
@@ -87,7 +90,7 @@ Entregas:
 
 Pendência:
 
-- Autenticação/autorização depende de requisito de negócio. Não implementar JWT apenas por opcionalidade do desafio.
+- Avaliar MFA, recuperação de senha, revogação centralizada de tokens e proteção adaptativa contra abuso antes de uso produtivo real.
 
 ## Fase 5 - Containerização
 
@@ -102,7 +105,7 @@ Entregas:
 - Execução sem root.
 - Verificações de saúde alinhadas a `/readiness` e `/health`.
 - Configuração externa por variáveis de ambiente.
-- Persistência via volume MySQL.
+- Persistência via volumes MySQL e MongoDB.
 - Wrapper `npm run docker` para localizar Docker Desktop no Windows quando o CLI não está no PATH.
 - `npm run docker -- compose up --build -d` validado localmente com containers saudáveis.
 
@@ -164,10 +167,11 @@ Entregas:
 ## Backlog Priorizado
 
 - P1: adicionar teste de integração com MySQL em container.
+- P1: adicionar teste de integração com MongoDB em container.
 - P1: habilitar proteção de branch exigindo CI.
 - P1: definir registro OCI, política de tags SemVer, pinning por digest, assinatura e proveniência.
+- P1: definir estratégia de rotação/revogação de JWT para produção.
 - P2: acompanhar release do ferramental Angular para remover vulnerabilidades moderadas restritas ao desenvolvimento restantes.
 - P2: introduzir histórico de migrações se o esquema evoluir.
 - P2: adicionar testes de frontend para interações principais.
-- P3: adicionar autenticação/autorização somente se houver requisito multiusuário.
 - P3: adicionar métricas/rastreamento OpenTelemetry se houver operação em ambiente compartilhado.

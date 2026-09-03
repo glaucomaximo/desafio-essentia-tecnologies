@@ -4,6 +4,28 @@ Todas as alterações relevantes deste projeto são documentadas aqui.
 
 Autor: Glauco Maximo <glaucomaximo@gmail.com>
 
+## [2.0.0] - 2026-09-03
+
+### Adicionado
+
+- Autenticação de usuários com cadastro, login, endpoint `/api/v1/auth/me` e JWT.
+- Hash de senha com `scrypt`, sal aleatório e comparação em tempo constante.
+- Isolamento server-side de tarefas por usuário autenticado.
+- Metadados adicionais de tarefas em MongoDB: prioridade, prazo, etiquetas e observações.
+- Serviço MongoDB no Docker Compose com healthcheck e volume persistente.
+- Testes HTTP de autenticação, autorização, isolamento por usuário e metadados.
+- ADR para autenticação JWT e MongoDB.
+
+### Alterado
+
+- Rotas `/api/v1/tasks` e alias legado `/api/tasks` agora exigem `Authorization: Bearer <token>`.
+- Readiness da API agora valida MySQL e MongoDB.
+- README, API, OpenAPI, arquitetura, runbook e política de segurança atualizados para o desafio extra.
+
+### Mudança Incompatível
+
+- Consumidores das rotas de tarefas precisam autenticar antes de listar, criar, alterar ou remover tarefas.
+
 ## [1.1.3] - 2026-09-03
 
 ### Corrigido

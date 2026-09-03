@@ -46,14 +46,42 @@ const positiveNumberFromEnv = (name: string, fallback: number): number => {
   return parsed;
 };
 
+const stringFromEnv = (name: string, fallback: string): string => {
+  const raw = process.env[name];
+
+  if (!raw || raw.trim().length === 0) {
+    return fallback;
+  }
+
+  return raw;
+};
+
+const nodeEnv = process.env.NODE_ENV ?? "development";
+const developmentJwtSecret = "desenvolvimento-local-jwt-secret-com-32-caracteres";
+const jwtSecret = stringFromEnv("JWT_SECRET", developmentJwtSecret);
+
+if (nodeEnv === "production" && jwtSecret === developmentJwtSecret) {
+  throw new Error("Environment variable JWT_SECRET is required in production.");
+}
+
+if (jwtSecret.length < 32) {
+  throw new Error("Environment variable JWT_SECRET must have at least 32 characters.");
+}
+
 export const env = {
   serviceName: process.env.SERVICE_NAME ?? "techx-tasks-api",
-  version: process.env.APP_VERSION ?? process.env.npm_package_version ?? "1.1.3",
-  nodeEnv: process.env.NODE_ENV ?? "development",
+  version: process.env.APP_VERSION ?? process.env.npm_package_version ?? "2.0.0",
+  nodeEnv,
   logLevel: process.env.LOG_LEVEL ?? "info",
   port: numberFromEnv("PORT", 3333),
   corsOrigin: process.env.CORS_ORIGIN ?? "http://localhost:4200",
   jsonBodyLimit: process.env.JSON_BODY_LIMIT ?? "1mb",
+  auth: {
+    secret: jwtSecret,
+    issuer: process.env.JWT_ISSUER ?? "techx-tasks-api",
+    audience: process.env.JWT_AUDIENCE ?? "techx-tasks-web",
+    expiresInSeconds: positiveNumberFromEnv("JWT_EXPIRES_IN_SECONDS", 3600)
+  },
   rateLimit: {
     enabled: booleanFromEnv("RATE_LIMIT_ENABLED", true),
     windowMs: positiveNumberFromEnv("RATE_LIMIT_WINDOW_MS", 900000),
@@ -65,5 +93,13 @@ export const env = {
     user: process.env.DB_USER ?? "techx",
     password: process.env.DB_PASSWORD ?? "techx",
     name: process.env.DB_NAME ?? "techx_tasks"
+  },
+  mongo: {
+    uri:
+      process.env.MONGO_URI ??
+      "mongodb://techx_mongo:techx_mongo@127.0.0.1:27017/techx_tasks?authSource=admin",
+    databaseName: process.env.MONGO_DB_NAME ?? "techx_tasks",
+    taskMetadataCollection: process.env.MONGO_TASK_METADATA_COLLECTION ?? "task_metadata",
+    serverSelectionTimeoutMs: positiveNumberFromEnv("MONGO_SERVER_SELECTION_TIMEOUT_MS", 5000)
   }
 };

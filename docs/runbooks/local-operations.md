@@ -27,7 +27,7 @@ Endpoints esperados:
 npm run docker:down
 ```
 
-Remova o estado local do MySQL apenas quando ele for descartável:
+Remova o estado local dos bancos apenas quando ele for descartavel:
 
 ```bash
 npm run docker -- compose down -v
@@ -45,6 +45,23 @@ npm run build
 npm audit --omit=dev
 ```
 
+## Teste Manual da API
+
+Crie uma sessao:
+
+```bash
+curl -s -X POST http://localhost:3333/api/v1/auth/register \
+  -H "Content-Type: application/json" \
+  -d "{\"name\":\"Glauco Maximo\",\"email\":\"glauco@example.test\",\"password\":\"Senha1234\"}"
+```
+
+Use o token retornado nas rotas de tarefas:
+
+```bash
+curl -s http://localhost:3333/api/v1/tasks \
+  -H "Authorization: Bearer <token>"
+```
+
 ## Gerar SBOM
 
 ```bash
@@ -57,6 +74,7 @@ O arquivo `sbom.cdx.json` gerado é um artefato local ou de release e é ignorad
 
 - Docker fora do PATH no Windows: use `npm run docker -- --version`; o wrapper local procura o Docker Desktop instalado no perfil do usuário.
 - MySQL não está pronto: verifique `npm run docker -- compose logs mysql` e aguarde a verificação de saúde passar.
-- Prontidão do backend falhando: verifique `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD` e `DB_NAME`.
+- MongoDB não está pronto: verifique `npm run docker -- compose logs mongo` e aguarde a verificação de saúde passar.
+- Prontidão do backend falhando: verifique `DB_*`, `MONGO_*` e `JWT_SECRET`.
 - Chamadas de API do frontend falhando: verifique `CORS_ORIGIN` e o proxy `/api` do Nginx.
-- Conflito de porta: altere `MYSQL_PORT`, `API_PORT` ou `FRONTEND_PORT` no `.env`.
+- Conflito de porta: altere `MYSQL_PORT`, `MONGO_PORT`, `API_PORT` ou `FRONTEND_PORT` no `.env`.

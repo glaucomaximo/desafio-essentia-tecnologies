@@ -1,23 +1,60 @@
 # API TechX Tasks
 
-Documentação da API RESTful do desafio Essentia Group.
+Documentacao da API RESTful do desafio Essentia Group.
 
 **Autor:** Glauco Maximo
 **E-mail:** glaucomaximo@gmail.com
 
 Contrato OpenAPI: `docs/api/openapi.yaml`.
 
-## Saúde
+## Saude
 
-| Método | Rota         | Descrição                                      |
-| ------ | ------------ | ---------------------------------------------- |
-| GET    | `/liveness`  | Confirma que o processo da API está vivo       |
-| GET    | `/readiness` | Confirma que a API consegue acessar o MySQL    |
-| GET    | `/health`    | Endpoint legado de compatibilidade operacional |
+| Metodo | Rota         | Descricao                                           |
+| ------ | ------------ | --------------------------------------------------- |
+| GET    | `/liveness`  | Confirma que o processo da API esta vivo            |
+| GET    | `/readiness` | Confirma que a API consegue acessar MySQL e MongoDB |
+| GET    | `/health`    | Endpoint legado de compatibilidade operacional      |
+
+## Autenticacao
+
+As rotas de tarefas exigem JWT no cabecalho:
+
+```text
+Authorization: Bearer <token>
+```
+
+### Criar Usuario
+
+`POST /api/v1/auth/register`
+
+```json
+{
+  "name": "Glauco Maximo",
+  "email": "glauco@example.test",
+  "password": "Senha1234"
+}
+```
+
+### Entrar
+
+`POST /api/v1/auth/login`
+
+```json
+{
+  "email": "glauco@example.test",
+  "password": "Senha1234"
+}
+```
+
+### Consultar Sessao
+
+`GET /api/v1/auth/me`
+
+Retorna o usuario autenticado quando o JWT e valido.
 
 ## Recurso: Tarefas
 
-Uma tarefa representa uma atividade diária que pode estar pendente ou concluída.
+Uma tarefa representa uma atividade diaria que pertence ao usuario autenticado.
 
 ```ts
 interface Task {
@@ -25,12 +62,18 @@ interface Task {
   title: string;
   description: string | null;
   completed: boolean;
+  metadata: {
+    priority: "low" | "medium" | "high";
+    dueDate: string | null;
+    tags: string[];
+    notes: string | null;
+  };
   createdAt: string;
   updatedAt: string;
 }
 ```
 
-Rota canônica:
+Rota canonica:
 
 ```text
 /api/v1/tasks
@@ -46,13 +89,13 @@ Alias legado preservado:
 
 `GET /api/v1/tasks`
 
-Retorna uma lista ordenada com tarefas pendentes primeiro e, em seguida, as concluídas.
+Retorna tarefas do usuario autenticado, com pendentes primeiro e concluidas depois.
 
 ## Buscar Tarefa
 
 `GET /api/v1/tasks/:id`
 
-Retorna `400` quando o id não é inteiro positivo e `404` quando a tarefa não existe.
+Retorna `400` quando o id nao e inteiro positivo, `401` quando o token esta ausente ou invalido, e `404` quando a tarefa nao pertence ao usuario autenticado ou nao existe.
 
 ## Criar Tarefa
 
@@ -61,22 +104,32 @@ Retorna `400` quando o id não é inteiro positivo e `404` quando a tarefa não 
 ```json
 {
   "title": "Preparar daily",
-  "description": "Revisar prioridades antes da reunião",
-  "completed": false
+  "description": "Revisar prioridades antes da reuniao",
+  "completed": false,
+  "metadata": {
+    "priority": "high",
+    "dueDate": "2026-09-10",
+    "tags": ["api", "documentacao"],
+    "notes": "Confirmar criterios de aceite"
+  }
 }
 ```
 
 Campos:
 
-- `title`: obrigatório, texto com até 180 caracteres.
+- `title`: obrigatorio, texto com ate 180 caracteres.
 - `description`: opcional, texto ou `null`.
 - `completed`: opcional, booleano. Quando omitido, assume `false`.
+- `metadata.priority`: opcional, `low`, `medium` ou `high`. Quando omitido, assume `medium`.
+- `metadata.dueDate`: opcional, data `YYYY-MM-DD` ou `null`.
+- `metadata.tags`: opcional, ate 10 textos unicos com ate 40 caracteres cada.
+- `metadata.notes`: opcional, texto com ate 1000 caracteres ou `null`.
 
 ## Atualizar Tarefa
 
 `PUT /api/v1/tasks/:id` ou `PATCH /api/v1/tasks/:id`
 
-Aceita atualização parcial:
+Aceita atualizacao parcial:
 
 ```json
 {
@@ -84,13 +137,24 @@ Aceita atualização parcial:
 }
 ```
 
-Retorna `400` quando nenhum campo válido é enviado e `404` quando o id não existe.
+Tambem aceita atualizacao apenas dos metadados:
+
+```json
+{
+  "metadata": {
+    "priority": "low",
+    "tags": ["suporte"]
+  }
+}
+```
+
+Retorna `400` quando nenhum campo valido e enviado e `404` quando o id nao existe no escopo do usuario autenticado.
 
 ## Remover Tarefa
 
 `DELETE /api/v1/tasks/:id`
 
-Retorna `204` em caso de sucesso e `404` quando o id não existe.
+Retorna `204` em caso de sucesso e `404` quando o id nao existe no escopo do usuario autenticado.
 
 ## Erros
 

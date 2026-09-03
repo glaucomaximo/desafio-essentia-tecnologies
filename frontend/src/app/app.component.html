@@ -8,10 +8,13 @@
   <div class="author-block" aria-label="Autor do projeto">
     <span>Autor</span>
     <strong>Glauco Maximo</strong>
+    <button *ngIf="isAuthenticated()" class="link-button" type="button" (click)="logout()">
+      Sair
+    </button>
   </div>
 </header>
 
-<main class="workspace">
+<main class="workspace" *ngIf="isAuthenticated(); else authPanel">
   <section class="task-form-panel" aria-labelledby="task-form-title">
     <div class="section-heading">
       <div>
@@ -43,9 +46,43 @@
       <label for="task-description">Descricao</label>
       <textarea
         id="task-description"
-        rows="5"
+        rows="4"
         formControlName="description"
         placeholder="Detalhes opcionais para orientar a execucao"
+      ></textarea>
+
+      <div class="form-row">
+        <div>
+          <label for="task-priority">Prioridade</label>
+          <select id="task-priority" formControlName="priority">
+            <option value="low">Baixa</option>
+            <option value="medium">Media</option>
+            <option value="high">Alta</option>
+          </select>
+        </div>
+
+        <div>
+          <label for="task-due-date">Prazo</label>
+          <input id="task-due-date" type="date" formControlName="dueDate" />
+        </div>
+      </div>
+
+      <label for="task-tags">Etiquetas</label>
+      <input
+        id="task-tags"
+        type="text"
+        formControlName="tags"
+        maxlength="420"
+        placeholder="api, documentacao, seguranca"
+      />
+
+      <label for="task-notes">Observacoes</label>
+      <textarea
+        id="task-notes"
+        rows="4"
+        formControlName="notes"
+        maxlength="1000"
+        placeholder="Contexto, criterio ou lembrete"
       ></textarea>
 
       <button class="primary-button" type="submit" [disabled]="saving()">
@@ -59,6 +96,7 @@
       <div>
         <p class="eyebrow">Painel</p>
         <h2 id="task-list-title">Tarefas cadastradas</h2>
+        <p class="user-copy" *ngIf="session()">Sessao ativa: {{ session()?.user?.email }}</p>
       </div>
 
       <button class="secondary-button" type="button" (click)="loadTasks()" [disabled]="loading()">
@@ -104,8 +142,31 @@
         </label>
 
         <div class="task-content" [class.completed]="task.completed">
-          <h3>{{ task.title }}</h3>
+          <div class="task-title-row">
+            <h3>{{ task.title }}</h3>
+            <span class="priority-badge" [class]="'priority-badge ' + task.metadata.priority">
+              {{
+                task.metadata.priority === "high"
+                  ? "Alta"
+                  : task.metadata.priority === "low"
+                    ? "Baixa"
+                    : "Media"
+              }}
+            </span>
+          </div>
           <p *ngIf="task.description">{{ task.description }}</p>
+
+          <div class="metadata-grid">
+            <small *ngIf="task.metadata.dueDate"
+              >Prazo {{ task.metadata.dueDate | date: "dd/MM/yyyy" }}</small
+            >
+            <small *ngIf="task.metadata.notes">{{ task.metadata.notes }}</small>
+          </div>
+
+          <div class="tag-list" *ngIf="task.metadata.tags.length > 0">
+            <span *ngFor="let tag of task.metadata.tags">{{ tag }}</span>
+          </div>
+
           <small>Atualizada em {{ task.updatedAt | date: "dd/MM/yyyy HH:mm" }}</small>
         </div>
 
@@ -126,3 +187,58 @@
     </ng-template>
   </section>
 </main>
+
+<ng-template #authPanel>
+  <main class="auth-workspace">
+    <section class="auth-panel" aria-labelledby="auth-title">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Acesso</p>
+          <h2 id="auth-title">{{ authMode() === "login" ? "Entrar" : "Criar conta" }}</h2>
+        </div>
+      </div>
+
+      <div class="segmented-control" role="group" aria-label="Escolher modo de acesso">
+        <button
+          type="button"
+          [class.active]="authMode() === 'login'"
+          (click)="setAuthMode('login')"
+        >
+          Entrar
+        </button>
+        <button
+          type="button"
+          [class.active]="authMode() === 'register'"
+          (click)="setAuthMode('register')"
+        >
+          Criar conta
+        </button>
+      </div>
+
+      <form [formGroup]="authForm" (ngSubmit)="submitAuth()">
+        <ng-container *ngIf="authMode() === 'register'">
+          <label for="auth-name">Nome</label>
+          <input id="auth-name" type="text" formControlName="name" maxlength="120" />
+        </ng-container>
+
+        <label for="auth-email">E-mail</label>
+        <input id="auth-email" type="email" formControlName="email" maxlength="254" />
+
+        <label for="auth-password">Senha</label>
+        <input id="auth-password" type="password" formControlName="password" maxlength="128" />
+        <p
+          class="field-error"
+          *ngIf="authForm.controls.password.touched && authForm.controls.password.invalid"
+        >
+          Informe uma senha com ao menos 8 caracteres, letras e numeros.
+        </p>
+
+        <p class="error-message" *ngIf="authErrorMessage()">{{ authErrorMessage() }}</p>
+
+        <button class="primary-button" type="submit" [disabled]="authLoading()">
+          {{ authLoading() ? "Processando..." : authMode() === "login" ? "Entrar" : "Criar conta" }}
+        </button>
+      </form>
+    </section>
+  </main>
+</ng-template>

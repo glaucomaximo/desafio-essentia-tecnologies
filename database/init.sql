@@ -13,13 +13,30 @@ FLUSH PRIVILEGES;
 
 USE techx_tasks;
 
+CREATE TABLE IF NOT EXISTS users (
+  id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  name VARCHAR(120) NOT NULL,
+  email VARCHAR(254) NOT NULL,
+  password_hash VARCHAR(255) NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  UNIQUE INDEX idx_users_email (email)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 CREATE TABLE IF NOT EXISTS tasks (
   id INT UNSIGNED NOT NULL AUTO_INCREMENT,
   title VARCHAR(180) NOT NULL,
   description TEXT NULL,
   completed BOOLEAN NOT NULL DEFAULT FALSE,
+  owner_user_id INT UNSIGNED NULL,
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (id),
-  INDEX idx_tasks_completed_created_at (completed, created_at)
+  INDEX idx_tasks_completed_created_at (completed, created_at),
+  INDEX idx_tasks_owner_status_created_at (owner_user_id, completed, created_at),
+  CONSTRAINT fk_tasks_owner_user
+    FOREIGN KEY (owner_user_id)
+    REFERENCES users (id)
+    ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

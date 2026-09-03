@@ -4,7 +4,7 @@ Autor: Glauco Maximo <glaucomaximo@gmail.com>
 
 ## Versão Suportada
 
-A versão suportada da aplicação é rastreada em `VERSION`. Este repositório atualmente tem como alvo a linha `1.0.x`.
+A versão suportada da aplicação é rastreada em `VERSION`. Este repositório atualmente tem como alvo a linha `1.2.x`.
 
 ## Reporte de Vulnerabilidade
 
@@ -23,7 +23,10 @@ Reporte vulnerabilidades de forma privada para Glauco Maximo em glaucomaximo@gma
 - Vulnerabilidades HIGH ou CRITICAL em dependências de produção devem bloquear release, salvo exceção documentada.
 - Erros da API não devem expor stack traces ou segredos.
 - Logs devem redigir chaves contendo password, secret, token, authorization, cookie ou API key.
+- Senhas devem ser armazenadas somente com hash forte e sal por credencial.
+- JWT deve usar segredo externo, emissor, audiência e expiração configuráveis.
+- Rotas de tarefas devem negar acesso quando o usuário autenticado não for o proprietário.
 
 ## Escopo Atual
 
-Autenticação e autorização eram opcionais no desafio original e não foram implementadas neste escopo demonstrativo. Se o projeto se tornar multiusuário ou exposto externamente, autorização server-side, autenticação, proteções de conta e isolamento entre usuários passam a ser trabalho P1.
+O escopo atual implementa cadastro, login, JWT e isolamento server-side das tarefas por usuário. Proteções avançadas de conta, como MFA, recuperação de senha, bloqueio adaptativo e revogação centralizada de tokens, permanecem fora do escopo demonstrativo e devem ser tratadas como P1 antes de uso produtivo real.
