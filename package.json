@@ -1,0 +1,42 @@
+{
+  "name": "desafio-essentia-tecnologies",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Aplicação fullstack de gerenciamento de tarefas para o desafio Essentia Group.",
+  "author": "Glauco Maximo <glaucomaximo@gmail.com>",
+  "license": "MIT",
+  "workspaces": [
+    "backend",
+    "frontend"
+  ],
+  "engines": {
+    "node": ">=24.15.0",
+    "npm": ">=11"
+  },
+  "scripts": {
+    "docker:up": "docker compose up --build",
+    "docker:down": "docker compose down",
+    "docker:logs": "docker compose logs -f",
+    "dev:backend": "npm --workspace backend run dev",
+    "dev:frontend": "npm --workspace frontend run start",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "lint": "eslint .",
+    "sbom": "cyclonedx-npm --package-lock-only --output-reproducible --output-file sbom.cdx.json",
+    "build": "npm --workspace backend run build && npm --workspace frontend run build",
+    "typecheck": "npm --workspace backend run typecheck && npm --workspace frontend run typecheck",
+    "test": "npm --workspace backend run test"
+  },
+  "devDependencies": {
+    "@cyclonedx/cyclonedx-npm": "6.0.1",
+    "@eslint/js": "^10.0.1",
+    "eslint": "^10.9.1",
+    "globals": "^17.12.0",
+    "prettier": "^3.9.6",
+    "qs": "6.16.0",
+    "typescript-eslint": "^8.69.0"
+  },
+  "overrides": {
+    "qs": "6.16.0"
+  }
+}

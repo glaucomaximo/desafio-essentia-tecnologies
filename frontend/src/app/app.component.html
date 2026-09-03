@@ -1,0 +1,128 @@
+<header class="app-header">
+  <div>
+    <p class="eyebrow">TechX Tasks</p>
+    <h1>Gestao de tarefas</h1>
+    <p class="header-copy">Organize, acompanhe e conclua as tarefas diarias em um unico fluxo.</p>
+  </div>
+
+  <div class="author-block" aria-label="Autor do projeto">
+    <span>Autor</span>
+    <strong>Glauco Maximo</strong>
+  </div>
+</header>
+
+<main class="workspace">
+  <section class="task-form-panel" aria-labelledby="task-form-title">
+    <div class="section-heading">
+      <div>
+        <p class="eyebrow">Cadastro</p>
+        <h2 id="task-form-title">{{ isEditing ? "Editar tarefa" : "Nova tarefa" }}</h2>
+      </div>
+
+      <button *ngIf="isEditing" class="secondary-button" type="button" (click)="resetForm()">
+        Cancelar
+      </button>
+    </div>
+
+    <form [formGroup]="taskForm" (ngSubmit)="submitTask()">
+      <label for="task-title">Titulo</label>
+      <input
+        id="task-title"
+        type="text"
+        formControlName="title"
+        maxlength="180"
+        placeholder="Ex.: Revisar relatorio"
+      />
+      <p
+        class="field-error"
+        *ngIf="taskForm.controls.title.touched && taskForm.controls.title.invalid"
+      >
+        Informe um titulo com ate 180 caracteres.
+      </p>
+
+      <label for="task-description">Descricao</label>
+      <textarea
+        id="task-description"
+        rows="5"
+        formControlName="description"
+        placeholder="Detalhes opcionais para orientar a execucao"
+      ></textarea>
+
+      <button class="primary-button" type="submit" [disabled]="saving">
+        {{ saving ? "Salvando..." : isEditing ? "Salvar alteracoes" : "Adicionar tarefa" }}
+      </button>
+    </form>
+  </section>
+
+  <section class="task-list-panel" aria-labelledby="task-list-title">
+    <div class="section-heading">
+      <div>
+        <p class="eyebrow">Painel</p>
+        <h2 id="task-list-title">Tarefas cadastradas</h2>
+      </div>
+
+      <button class="secondary-button" type="button" (click)="loadTasks()" [disabled]="loading">
+        Atualizar
+      </button>
+    </div>
+
+    <div class="stats-grid" aria-label="Resumo das tarefas">
+      <span
+        ><strong>{{ tasks.length }}</strong> total</span
+      >
+      <span
+        ><strong>{{ pendingTasksCount }}</strong> pendentes</span
+      >
+      <span
+        ><strong>{{ completedTasksCount }}</strong> concluidas</span
+      >
+    </div>
+
+    <div class="segmented-control" role="group" aria-label="Filtrar tarefas">
+      <button type="button" [class.active]="filter === 'all'" (click)="setFilter('all')">
+        Todas
+      </button>
+      <button type="button" [class.active]="filter === 'open'" (click)="setFilter('open')">
+        Pendentes
+      </button>
+      <button type="button" [class.active]="filter === 'done'" (click)="setFilter('done')">
+        Concluidas
+      </button>
+    </div>
+
+    <p class="status-message" *ngIf="loading">Carregando tarefas...</p>
+    <p class="error-message" *ngIf="errorMessage">{{ errorMessage }}</p>
+
+    <ul class="task-list" *ngIf="!loading && visibleTasks.length > 0; else emptyState">
+      <li class="task-item" *ngFor="let task of visibleTasks; trackBy: trackByTaskId">
+        <label class="completion-toggle">
+          <input type="checkbox" [checked]="task.completed" (change)="toggleTask(task)" />
+          <span class="checkmark" aria-hidden="true"></span>
+          <span class="sr-only">
+            {{ task.completed ? "Marcar como pendente" : "Marcar como concluida" }}
+          </span>
+        </label>
+
+        <div class="task-content" [class.completed]="task.completed">
+          <h3>{{ task.title }}</h3>
+          <p *ngIf="task.description">{{ task.description }}</p>
+          <small>Atualizada em {{ task.updatedAt | date: "dd/MM/yyyy HH:mm" }}</small>
+        </div>
+
+        <div class="task-actions">
+          <button class="secondary-button" type="button" (click)="startEditing(task)">
+            Editar
+          </button>
+          <button class="danger-button" type="button" (click)="removeTask(task)">Remover</button>
+        </div>
+      </li>
+    </ul>
+
+    <ng-template #emptyState>
+      <div class="empty-state" *ngIf="!loading">
+        <strong>Nenhuma tarefa encontrada</strong>
+        <p>Cadastre uma tarefa ou altere o filtro selecionado.</p>
+      </div>
+    </ng-template>
+  </section>
+</main>
