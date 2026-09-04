@@ -37,10 +37,7 @@ export class TaskWorkspaceFacade {
   private readonly refreshTasks = new BehaviorSubject<void>(undefined);
 
   readonly authForm: AuthFormGroup = this.formBuilder.nonNullable.group({
-    name: [
-      "Glauco Maximo",
-      [Validators.required, Validators.minLength(2), Validators.maxLength(120)]
-    ],
+    name: ["", [Validators.required, Validators.minLength(2), Validators.maxLength(120)]],
     email: ["", [Validators.required, Validators.email, Validators.maxLength(254)]],
     password: [
       "",
@@ -155,8 +152,8 @@ export class TaskWorkspaceFacade {
         this.authForm.controls.password.reset("");
         this.loadTasks();
       },
-      error: () => {
-        this.authErrorMessage.set("Não foi possível autenticar com os dados informados.");
+      error: (error: unknown) => {
+        this.authErrorMessage.set(this.authFailureMessage(error));
       }
     });
   }
@@ -302,6 +299,30 @@ export class TaskWorkspaceFacade {
     }
 
     this.errorMessage.set(message);
+  }
+
+  private authFailureMessage(error: unknown): string {
+    if (!(error instanceof HttpErrorResponse)) {
+      return "Não foi possível concluir a solicitação. Tente novamente.";
+    }
+
+    if (error.status === 409) {
+      return "Este e-mail já está cadastrado. Use a opção Entrar ou informe outro e-mail.";
+    }
+
+    if (error.status === 401) {
+      return "E-mail ou senha inválidos.";
+    }
+
+    if (error.status === 400) {
+      return "Revise nome, e-mail e senha antes de continuar.";
+    }
+
+    if (error.status === 0) {
+      return "API indisponível. Confirme se o backend está em execução.";
+    }
+
+    return "Não foi possível concluir a solicitação. Tente novamente.";
   }
 
   private clearAuthenticatedState(): void {

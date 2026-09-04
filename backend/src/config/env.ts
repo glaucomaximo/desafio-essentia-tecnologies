@@ -1,3 +1,4 @@
+import { randomBytes } from "node:crypto";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -57,20 +58,21 @@ const stringFromEnv = (name: string, fallback: string): string => {
 };
 
 const nodeEnv = process.env.NODE_ENV ?? "development";
-const developmentJwtSecret = "desenvolvimento-local-jwt-secret-com-32-caracteres";
-const jwtSecret = stringFromEnv("JWT_SECRET", developmentJwtSecret);
+const configuredJwtSecret = stringFromEnv("JWT_SECRET", "");
 
-if (nodeEnv === "production" && jwtSecret === developmentJwtSecret) {
+if (nodeEnv === "production" && !configuredJwtSecret) {
   throw new Error("Environment variable JWT_SECRET is required in production.");
 }
 
-if (jwtSecret.length < 32) {
+if (configuredJwtSecret && configuredJwtSecret.length < 32) {
   throw new Error("Environment variable JWT_SECRET must have at least 32 characters.");
 }
 
+const jwtSecret = configuredJwtSecret || randomBytes(32).toString("hex");
+
 export const env = {
   serviceName: process.env.SERVICE_NAME ?? "techx-tasks-api",
-  version: process.env.APP_VERSION ?? process.env.npm_package_version ?? "2.1.0",
+  version: process.env.APP_VERSION ?? process.env.npm_package_version ?? "2.1.1",
   nodeEnv,
   logLevel: process.env.LOG_LEVEL ?? "info",
   port: numberFromEnv("PORT", 3333),

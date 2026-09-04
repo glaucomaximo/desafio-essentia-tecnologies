@@ -1,41 +1,16 @@
-<header
-  class="mx-auto flex w-full max-w-[1180px] flex-col gap-4 px-4 pb-7 pt-10 md:flex-row md:items-end md:justify-between"
->
-  <div>
-    <p class="mb-2 text-xs font-extrabold uppercase tracking-normal text-emerald-700">
-      TechX Tasks
-    </p>
-    <h1 class="text-4xl font-black leading-tight text-slate-950 md:text-6xl">
-      Gestão segura de tarefas
-    </h1>
-    <p class="mt-3 max-w-2xl text-base text-slate-600">
-      Fluxo autenticado com JWT, metadados em MongoDB e operação preparada para equipes que precisam
-      de rastreabilidade, LGPD e execução em containers.
-    </p>
+@if (workspace.isAuthenticated()) {
+  <div class="mx-auto flex w-full max-w-[1180px] justify-end px-4 pb-4 pt-6">
+    <button
+      class="min-h-10 rounded-md border border-slate-300 bg-white px-4 font-bold text-slate-700 shadow-sm transition hover:bg-slate-50"
+      type="button"
+      (click)="workspace.logout()"
+    >
+      Sair
+    </button>
   </div>
 
-  <aside
-    class="rounded-lg border border-slate-200 bg-white p-4 shadow-sm"
-    aria-label="Autor do projeto"
-  >
-    <span class="block text-xs text-slate-500">Autor</span>
-    <strong class="block text-slate-950">Glauco Maximo</strong>
-
-    @if (workspace.isAuthenticated()) {
-      <button
-        class="mt-3 min-h-10 rounded-md px-0 font-bold text-emerald-700 transition hover:text-emerald-900"
-        type="button"
-        (click)="workspace.logout()"
-      >
-        Sair
-      </button>
-    }
-  </aside>
-</header>
-
-@if (workspace.isAuthenticated()) {
   <main
-    class="mx-auto grid w-full max-w-[1180px] gap-6 px-4 pb-12 lg:grid-cols-[minmax(280px,380px)_minmax(0,1fr)]"
+    class="mx-auto grid w-full max-w-[1180px] gap-6 px-4 pb-10 lg:grid-cols-[minmax(280px,380px)_minmax(0,1fr)]"
   >
     <app-task-form
       [form]="workspace.taskForm"
@@ -113,7 +88,7 @@
     </div>
   }
 } @else {
-  <main class="mx-auto w-full max-w-[480px] px-4 pb-12">
+  <main class="grid min-h-screen place-items-center px-4 py-8">
     <app-auth-panel
       [errorMessage]="workspace.authErrorMessage()"
       [form]="workspace.authForm"

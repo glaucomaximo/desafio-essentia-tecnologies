@@ -25,8 +25,7 @@ html {
 
 body {
   margin: 0;
-  background:
-    linear-gradient(180deg, rgba(15, 118, 110, 0.1) 0, rgba(15, 118, 110, 0) 240px), #f6f8f5;
+  background: #f4f6f5;
 }
 
 button,

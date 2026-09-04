@@ -4,6 +4,19 @@ Todas as alterações relevantes deste projeto são documentadas aqui.
 
 Autor: Glauco Maximo <glaucomaximo@gmail.com>
 
+## [2.1.1] - 2026-09-04
+
+### Corrigido
+
+- Removidas da interface inicial as informações institucionais de autor, título e descrição.
+- Tela de autenticação simplificada para um fluxo mais limpo e profissional.
+- Cadastro e login agora exibem mensagens específicas para e-mail já cadastrado, credenciais inválidas, dados incompletos e API indisponível.
+- Campo de nome deixou de ser pré-preenchido na criação de conta.
+
+### Validado
+
+- Versão SemVer sincronizada entre pacotes, Docker Compose, ambiente de exemplo e contrato OpenAPI.
+
 ## [2.1.0] - 2026-09-03
 
 ### Adicionado
