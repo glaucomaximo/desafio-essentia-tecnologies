@@ -80,6 +80,7 @@ URLs locais:
 - API: `http://localhost:3333`
 - Vivacidade: `http://localhost:3333/liveness`
 - Prontidão: `http://localhost:3333/readiness`
+- Métricas: `http://localhost:3333/metrics`
 
 ## Desenvolvimento com Containers
 
@@ -96,6 +97,13 @@ Para validar a configuração final do Compose:
 
 ```bash
 npm run docker:config
+```
+
+Para subir em segundo plano e executar o teste E2E:
+
+```bash
+npm run docker:up:detached
+npm run test:e2e
 ```
 
 Parar containers:
@@ -120,7 +128,7 @@ Variáveis principais:
 
 | Variável                         | Descrição                                | Valor local padrão      |
 | -------------------------------- | ---------------------------------------- | ----------------------- |
-| `APP_VERSION`                    | Versão SemVer exposta nas rotas de saúde | `2.1.0`                 |
+| `APP_VERSION`                    | Versão SemVer exposta nas rotas de saúde | `2.2.0`                 |
 | `NODE_ENV`                       | Ambiente lógico da aplicação             | `development`           |
 | `SERVICE_NAME`                   | Nome do serviço nos logs                 | `techx-tasks-api`       |
 | `PORT`                           | Porta interna da API                     | `3333`                  |
@@ -185,9 +193,12 @@ npm run format:check
 npm run lint
 npm run typecheck
 npm test
+npm run test:e2e
 npm run build
 npm audit --omit=dev
 ```
+
+`npm run test:e2e` espera a stack Docker ativa e valida o frontend servido, proxy `/api`, cadastro, login, conflito de e-mail duplicado, CRUD de tarefas e endpoint `/metrics`.
 
 Gerar SBOM CycloneDX:
 
@@ -209,8 +220,9 @@ Controles atuais:
 - Limite de requisições configurável para rotas `/api`.
 - Logs JSON com redação de chaves sensíveis.
 - `X-Request-ID` para correlação.
+- Política CSP, `Permissions-Policy`, `Cross-Origin-Opener-Policy` e `Cross-Origin-Resource-Policy` no Nginx do frontend.
 - Containers sem usuário root.
-- CI com auditoria de dependências, varredura de padrões de segredo, CodeQL, revisão de dependências, compilação de imagens e SBOM.
+- CI com auditoria de dependências, varredura de padrões de segredo, CodeQL, revisão de dependências, compilação de imagens, varredura Trivy, SBOM e E2E Docker Compose.
 
 Leia `SECURITY.md` antes de reportar ou tratar vulnerabilidades.
 
@@ -249,6 +261,12 @@ Authorization: Bearer <token>
 ```
 
 Contrato OpenAPI: `docs/api/openapi.yaml`.
+
+Observabilidade:
+
+| Método | Rota       | Descrição                                    |
+| ------ | ---------- | -------------------------------------------- |
+| GET    | `/metrics` | Métricas HTTP e de processo em formato texto |
 
 ## Implantação
 

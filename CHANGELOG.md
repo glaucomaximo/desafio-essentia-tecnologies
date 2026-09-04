@@ -4,6 +4,24 @@ Todas as alterações relevantes deste projeto são documentadas aqui.
 
 Autor: Glauco Maximo <glaucomaximo@gmail.com>
 
+## [2.2.0] - 2026-09-04
+
+### Adicionado
+
+- Endpoint `/metrics` em formato Prometheus com métricas de processo, contador HTTP e histograma de duração.
+- Smoke E2E Docker em `npm run test:e2e`, cobrindo frontend servido, proxy, autenticação, conflito de cadastro, CRUD de tarefas e métricas.
+- Job `E2E Docker Compose` no GitHub Actions.
+
+### Alterado
+
+- Logs HTTP passam a registrar caminho normalizado para reduzir cardinalidade operacional.
+- Frontend de produção desativa CSS crítico inline para permitir CSP mais restritiva.
+- Nginx do frontend passa a enviar CSP, `Permissions-Policy`, `Cross-Origin-Opener-Policy` e `Cross-Origin-Resource-Policy`.
+
+### Validado
+
+- Versão SemVer promovida para `2.2.0` por adicionar observabilidade e gate E2E.
+
 ## [2.1.1] - 2026-09-04
 
 ### Corrigido

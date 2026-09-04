@@ -229,6 +229,24 @@ test("GET /liveness and GET /readiness expose service health", async () => {
   await request(app).get("/readiness").expect(200);
 });
 
+test("GET /metrics expose metricas operacionais em formato Prometheus", async () => {
+  const app = createTestApp();
+
+  await request(app).get("/liveness").expect(200);
+
+  const response = await request(app)
+    .get("/metrics")
+    .expect("Content-Type", /text\/plain/)
+    .expect(200);
+
+  assert.match(response.text, /process_uptime_seconds/);
+  assert.match(response.text, /process_memory_rss_bytes/);
+  assert.match(
+    response.text,
+    /http_requests_total\{method="GET",path="\/liveness",status_code="200"\} [1-9][0-9]*/
+  );
+});
+
 test("POST /api/v1/auth/register, POST /login and GET /me manage authenticated sessions", async () => {
   const app = createTestApp();
   const token = await registerAndToken(app);

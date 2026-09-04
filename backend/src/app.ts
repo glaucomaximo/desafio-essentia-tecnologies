@@ -9,6 +9,7 @@ import { createAuthenticationMiddleware } from "./middleware/authentication";
 import { errorHandler, notFoundHandler } from "./middleware/errorHandler";
 import { createRateLimiter, type RateLimitOptions } from "./middleware/rateLimiter";
 import { requestContext, requestLogger } from "./middleware/requestContext";
+import { metricsContentType, renderMetrics } from "./observability/metrics";
 import {
   mongoTaskMetadataRepository,
   type TaskMetadataRepository
@@ -83,6 +84,11 @@ export const createApp = (options: AppOptions = {}): Express => {
 
   app.get("/health", (_request, response) => {
     response.json(serviceStatus());
+  });
+
+  app.get("/metrics", (_request, response) => {
+    response.setHeader("Cache-Control", "no-store");
+    response.type(metricsContentType).send(renderMetrics());
   });
 
   app.use("/api", createRateLimiter(options.rateLimit ?? env.rateLimit));

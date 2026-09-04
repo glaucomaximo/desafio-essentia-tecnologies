@@ -20,6 +20,7 @@ Endpoints esperados:
 - Frontend: `http://localhost:4200`
 - Vivacidade da API: `http://localhost:3333/liveness`
 - Prontidão da API: `http://localhost:3333/readiness`
+- Métricas da API: `http://localhost:3333/metrics`
 
 ## Parar
 
@@ -44,6 +45,15 @@ npm test
 npm run build
 npm audit --omit=dev
 ```
+
+Com a stack Docker ativa, execute o teste E2E:
+
+```bash
+npm run docker:up:detached
+npm run test:e2e
+```
+
+O teste cobre frontend servido, proxy `/api`, cadastro, login, conflito de e-mail duplicado, CRUD de tarefas e métricas.
 
 ## Teste Manual da API
 

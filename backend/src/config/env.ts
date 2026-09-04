@@ -72,7 +72,7 @@ const jwtSecret = configuredJwtSecret || randomBytes(32).toString("hex");
 
 export const env = {
   serviceName: process.env.SERVICE_NAME ?? "techx-tasks-api",
-  version: process.env.APP_VERSION ?? process.env.npm_package_version ?? "2.1.1",
+  version: process.env.APP_VERSION ?? process.env.npm_package_version ?? "2.2.0",
   nodeEnv,
   logLevel: process.env.LOG_LEVEL ?? "info",
   port: numberFromEnv("PORT", 3333),

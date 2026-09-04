@@ -42,7 +42,21 @@ jobs:
         run: npm test
 
       - name: Auditar dependências de produção
-        run: npm audit --omit=dev --audit-level=moderate
+        shell: bash
+        timeout-minutes: 5
+        run: |
+          set -euo pipefail
+          for tentativa in 1 2 3; do
+            if npm audit --omit=dev --audit-level=moderate --fetch-timeout=30000 --fetch-retries=1; then
+              exit 0
+            fi
+
+            if [ "${tentativa}" -eq 3 ]; then
+              exit 1
+            fi
+
+            sleep "$((tentativa * 15))"
+          done
 
       - name: Varrer padrões de segredo
         shell: bash
@@ -153,3 +167,36 @@ jobs:
           ignore-unfixed: true
           vuln-type: os,library
           severity: CRITICAL,HIGH
+
+  e2e-docker:
+    name: E2E Docker Compose
+    runs-on: ubuntu-latest
+    needs: build-oci
+    permissions:
+      contents: read
+    steps:
+      - name: Baixar código
+        uses: actions/checkout@v4
+
+      - name: Configurar Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Instalar dependências
+        run: npm ci
+
+      - name: Subir stack Docker
+        run: npm run docker:up:detached
+
+      - name: Executar teste E2E
+        run: npm run test:e2e
+
+      - name: Publicar logs em falha
+        if: failure()
+        run: npm run docker -- compose logs --no-color
+
+      - name: Encerrar stack Docker
+        if: always()
+        run: npm run docker -- compose down -v

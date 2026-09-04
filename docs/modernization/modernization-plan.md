@@ -61,17 +61,17 @@ Entregas:
 
 Objetivo: cobrir comportamento relevante e contratos de API.
 
-Estado: concluída para linha de base de backend/API.
+Estado: concluída para linha de base de backend/API e E2E Docker.
 
 Entregas:
 
 - Testes unitários de validação preservados.
 - Testes HTTP com `supertest`.
 - Caracterização de vivacidade, prontidão, autenticação JWT, listagem autenticada, criação com metadados, isolamento por usuário, alias legado, erros 400/401 e limite de requisições.
+- Smoke E2E Docker com frontend servido, proxy `/api`, cadastro, login, conflito de e-mail duplicado, CRUD de tarefas e métricas.
 
 Pendências:
 
-- Automatizar teste de integração com MySQL em CI usando Docker Compose.
 - Testes de frontend se a interface crescer.
 
 ## Fase 4 - Segurança
@@ -90,6 +90,7 @@ Entregas:
 - Tratamento 400 para JSON inválido.
 - Logs com redação de chaves sensíveis.
 - `.env.example` documentado como exclusivo de desenvolvimento.
+- Frontend servido por Nginx com CSP, política de permissões e isolamento básico de origem.
 - `SECURITY.md`.
 - Varredura de padrões de segredo no CI.
 
@@ -113,6 +114,7 @@ Entregas:
 - Persistência via volumes MySQL e MongoDB.
 - Wrapper `npm run docker` para localizar Docker Desktop no Windows quando o CLI não está no PATH.
 - `npm run docker -- compose up --build -d` validado localmente com containers saudáveis.
+- Smoke E2E Docker versionado por `npm run test:e2e`.
 
 Pendências:
 
@@ -126,7 +128,7 @@ Estado: linha de base concluída.
 
 Entregas:
 
-- GitHub Actions para formatação, lint, typecheck, testes, auditoria, varredura de segredo, SBOM, CodeQL, revisão de dependências, compilação OCI e varredura Trivy.
+- GitHub Actions para formatação, lint, typecheck, testes, auditoria, varredura de segredo, SBOM, CodeQL, revisão de dependências, compilação OCI, varredura Trivy e E2E Docker Compose.
 - Atualizações de dependências revisadas manualmente durante a submissão do desafio.
 - SBOM CycloneDX via `npm run sbom`.
 
@@ -139,17 +141,18 @@ Pendências:
 
 Objetivo: tornar operação e troubleshooting mais previsíveis.
 
-Estado: linha de base concluída.
+Estado: linha de base elevada em `2.2.0`.
 
 Entregas:
 
 - Request ID por requisição.
 - Logs JSON com `timestamp`, `level`, `service`, `environment`, `message` e contexto.
 - `/liveness`, `/readiness` e `/health`.
+- `/metrics` em formato Prometheus com uptime, memória, contador HTTP e histograma de duração por método, rota normalizada e status.
 
 Pendências:
 
-- Métricas e rastreamento OpenTelemetry se houver operação real ou implantação distribuída.
+- Rastreamento OpenTelemetry se houver operação real ou implantação distribuída.
 
 ## Fase 8 - Documentação e Governança
 
@@ -180,4 +183,4 @@ Entregas:
 - P2: migrar para TypeScript 7 quando o Angular publicar suporte oficial.
 - P2: introduzir histórico de migrações se o esquema evoluir.
 - P2: adicionar testes de frontend para interações principais.
-- P3: adicionar métricas/rastreamento OpenTelemetry se houver operação em ambiente compartilhado.
+- P3: adicionar rastreamento OpenTelemetry se houver operação em ambiente compartilhado.

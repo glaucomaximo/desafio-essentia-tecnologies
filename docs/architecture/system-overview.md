@@ -67,8 +67,9 @@ Tarefas antigas em bancos já existentes recebem `owner_user_id` nulo durante a 
 - `/liveness` confirma que o processo da API está vivo.
 - `/readiness` valida disponibilidade de MySQL e MongoDB.
 - `/health` é preservado como endpoint legado leve.
+- `/metrics` expõe métricas de processo e requisições HTTP em formato Prometheus.
 - Logs são emitidos como linhas JSON em stdout/stderr.
-- Cada requisição recebe o cabeçalho de resposta `X-Request-ID`.
+- Cada requisição recebe o cabeçalho de resposta `X-Request-ID` e usa caminho normalizado nos logs para reduzir cardinalidade.
 - Docker Compose é o ambiente de execução local recomendado.
 
 ## Modelo de Seguranca
@@ -80,6 +81,7 @@ Tarefas antigas em bancos já existentes recebem `owner_user_id` nulo durante a 
 - Consultas e mutacoes de tarefas filtram por `owner_user_id` no servidor.
 - Metadados no MongoDB usam índice único por `ownerUserId` e `taskId`.
 - Cabeçalhos de segurança via Helmet, CORS configurado por ambiente e limite de corpo JSON permanecem ativos.
+- Frontend servido por Nginx com CSP, políticas de permissões e isolamento básico de origem.
 - Containers executam sem usuário root e recebem configuração por variáveis de ambiente.
 
 ## Caminho de Evolucao

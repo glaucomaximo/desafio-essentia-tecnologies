@@ -15,6 +15,21 @@ Contrato OpenAPI: `docs/api/openapi.yaml`.
 | GET    | `/readiness` | Confirma que a API consegue acessar MySQL e MongoDB |
 | GET    | `/health`    | Endpoint legado de compatibilidade operacional      |
 
+## Observabilidade
+
+| Metodo | Rota       | Descricao                                               |
+| ------ | ---------- | ------------------------------------------------------- |
+| GET    | `/metrics` | Expoe metricas de processo e HTTP em formato Prometheus |
+
+Exemplos de series:
+
+```text
+process_uptime_seconds
+process_memory_rss_bytes
+http_requests_total
+http_request_duration_seconds
+```
+
 ## Autenticacao
 
 As rotas de tarefas exigem JWT no cabecalho:

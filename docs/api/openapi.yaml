@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: API TechX Tasks
-  version: 2.1.1
+  version: 2.2.0
   description: API REST para o desafio fullstack da Essentia Group.
   contact:
     name: Glauco Maximo
@@ -11,6 +11,7 @@ servers:
     description: Desenvolvimento local
 tags:
   - name: Saude
+  - name: Observabilidade
   - name: Autenticacao
   - name: Tarefas
 paths:
@@ -53,6 +54,17 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+  /metrics:
+    get:
+      tags: [Observabilidade]
+      summary: Metricas operacionais em formato Prometheus
+      responses:
+        "200":
+          description: Texto de metricas para coleta por Prometheus ou agente compativel.
+          content:
+            text/plain:
+              schema:
+                type: string
   /api/v1/auth/register:
     post:
       tags: [Autenticacao]

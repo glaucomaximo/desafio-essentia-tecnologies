@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto";
 import type { NextFunction, Request, RequestHandler, Response } from "express";
+import { normalizedRoutePath, recordHttpRequest } from "../observability/metrics";
 import { logger } from "../shared/logger";
 
 const requestIdHeader = "X-Request-ID";
@@ -31,11 +32,20 @@ export const requestLogger: RequestHandler = (
 
   response.on("finish", () => {
     const durationMs = Number(process.hrtime.bigint() - startedAt) / 1_000_000;
+    const normalizedPath = normalizedRoutePath(request);
+
+    recordHttpRequest({
+      method: request.method,
+      path: normalizedPath,
+      statusCode: response.statusCode,
+      durationMs
+    });
 
     logger.info("http_request_completed", {
       requestId: response.locals.requestId,
       method: request.method,
-      path: request.originalUrl,
+      path: normalizedPath,
+      originalPath: request.originalUrl,
       statusCode: response.statusCode,
       durationMs: Number(durationMs.toFixed(2)),
       remoteAddress: request.ip
