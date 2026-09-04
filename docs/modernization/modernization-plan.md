@@ -96,7 +96,7 @@ Entregas:
 
 Pendência:
 
-- Avaliar MFA, recuperação de senha, revogação centralizada de tokens e proteção adaptativa contra abuso antes de uso produtivo real.
+- Evoluir MFA, recuperação de senha, revogação centralizada de tokens e proteção adaptativa com auditoria administrativa, trilhas forenses e canal externo de entrega de tokens antes de uso produtivo real.
 
 ## Fase 5 - Containerização
 
@@ -141,7 +141,7 @@ Pendências:
 
 Objetivo: tornar operação e troubleshooting mais previsíveis.
 
-Estado: linha de base elevada em `2.2.0`.
+Estado: linha de base elevada em `2.3.0`.
 
 Entregas:
 

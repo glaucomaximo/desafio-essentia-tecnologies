@@ -6,7 +6,7 @@ COPY package.json package-lock.json ./
 COPY backend/package.json ./backend/package.json
 COPY frontend/package.json ./frontend/package.json
 
-RUN npm ci --workspace frontend
+RUN npm ci --workspace frontend --no-audit --fund=false
 
 COPY frontend ./frontend
 

@@ -1,6 +1,6 @@
 {
   "name": "frontend",
-  "version": "2.2.0",
+  "version": "2.3.0",
   "private": true,
   "description": "Interface Angular para gerenciamento de tarefas TechX.",
   "author": "Glauco Maximo <glaucomaximo@gmail.com>",

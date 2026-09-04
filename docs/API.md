@@ -57,15 +57,67 @@ Authorization: Bearer <token>
 ```json
 {
   "email": "glauco@example.test",
-  "password": "Senha1234"
+  "password": "Senha1234",
+  "mfaCode": "123456"
 }
 ```
+
+`mfaCode` e obrigatorio somente quando MFA estiver habilitado para a conta.
 
 ### Consultar Sessao
 
 `GET /api/v1/auth/me`
 
 Retorna o usuario autenticado quando o JWT e valido.
+
+### Recuperar Senha
+
+`POST /api/v1/auth/password-reset/request`
+
+```json
+{
+  "email": "glauco@example.test"
+}
+```
+
+Retorna `202` mesmo quando o e-mail nao existe para reduzir enumeracao de contas. Em desenvolvimento, a resposta pode incluir `resetToken` para teste local. Em producao, o token deve ser enviado por canal externo controlado.
+
+`POST /api/v1/auth/password-reset/confirm`
+
+```json
+{
+  "token": "token-recebido",
+  "password": "NovaSenha123"
+}
+```
+
+Ao trocar a senha, todas as sessoes ativas do usuario sao revogadas.
+
+### MFA TOTP
+
+`POST /api/v1/auth/mfa/setup`
+
+Requer JWT e retorna `secret` e `otpauthUrl` compativeis com apps autenticadores.
+
+`POST /api/v1/auth/mfa/enable`
+
+```json
+{
+  "code": "123456"
+}
+```
+
+Valida o codigo TOTP atual e habilita MFA para logins futuros.
+
+### Encerrar Sessoes
+
+`POST /api/v1/auth/logout`
+
+Revoga centralmente a sessao JWT atual.
+
+`POST /api/v1/auth/logout-all`
+
+Revoga todas as sessoes ativas do usuario autenticado.
 
 ## Recurso: Tarefas
 

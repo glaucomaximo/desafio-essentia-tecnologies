@@ -10,11 +10,12 @@ export interface JwtServiceOptions {
 
 export interface SignedToken {
   token: string;
+  tokenId: string;
   expiresAt: string;
 }
 
 export interface JwtService {
-  sign(user: AuthenticatedUser): Promise<SignedToken>;
+  sign(user: AuthenticatedUser, tokenId: string): Promise<SignedToken>;
   verify(token: string): Promise<TokenPayload>;
 }
 
@@ -22,7 +23,7 @@ export const createJwtService = (options: JwtServiceOptions): JwtService => {
   const secret = new TextEncoder().encode(options.secret);
 
   return {
-    async sign(user) {
+    async sign(user, tokenId) {
       const { SignJWT } = await import("jose");
       const expiresAt = new Date(Date.now() + options.expiresInSeconds * 1000);
       const token = await new SignJWT({
@@ -30,6 +31,7 @@ export const createJwtService = (options: JwtServiceOptions): JwtService => {
         name: user.name
       })
         .setProtectedHeader({ alg: "HS256" })
+        .setJti(tokenId)
         .setSubject(String(user.id))
         .setIssuer(options.issuer)
         .setAudience(options.audience)
@@ -39,6 +41,7 @@ export const createJwtService = (options: JwtServiceOptions): JwtService => {
 
       return {
         token,
+        tokenId,
         expiresAt: expiresAt.toISOString()
       };
     },
@@ -56,6 +59,7 @@ export const createJwtService = (options: JwtServiceOptions): JwtService => {
 
         if (
           !Number.isInteger(userId) ||
+          typeof payload.jti !== "string" ||
           typeof payload.email !== "string" ||
           typeof payload.name !== "string"
         ) {
@@ -65,7 +69,8 @@ export const createJwtService = (options: JwtServiceOptions): JwtService => {
         return {
           userId,
           email: payload.email,
-          name: payload.name
+          name: payload.name,
+          tokenId: payload.jti
         };
       } catch (error) {
         if (error instanceof HttpError) {

@@ -1,6 +1,6 @@
 {
   "name": "desafio-essentia-tecnologies",
-  "version": "2.2.0",
+  "version": "2.3.0",
   "private": true,
   "description": "Aplicação fullstack de gerenciamento de tarefas para o desafio Essentia Group.",
   "author": "Glauco Maximo <glaucomaximo@gmail.com>",
@@ -26,6 +26,7 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "lint": "eslint .",
+    "audit:prod": "node scripts/audit-production.mjs",
     "sbom": "cyclonedx-npm --package-lock-only --output-reproducible --output-file sbom.cdx.json",
     "build": "npm --workspace backend run build && npm --workspace frontend run build",
     "typecheck": "npm --workspace backend run typecheck && npm --workspace frontend run typecheck",

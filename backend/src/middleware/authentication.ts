@@ -3,7 +3,7 @@ import { createJwtService, type JwtService } from "../auth/jwtService";
 import { env } from "../config/env";
 import { HttpError } from "../errors/httpError";
 import { mysqlUserRepository, type UserRepository } from "../repositories/userRepository";
-import type { AuthenticatedUser } from "../types/auth";
+import type { AuthenticatedUser, TokenPayload } from "../types/auth";
 
 export interface AuthenticationOptions {
   jwtService?: JwtService;
@@ -40,6 +40,21 @@ export const currentUserFromResponse = (locals: Record<string, unknown>): Authen
   return user as AuthenticatedUser;
 };
 
+export const currentTokenFromResponse = (locals: Record<string, unknown>): TokenPayload => {
+  const token = locals.authenticatedToken;
+
+  if (
+    !token ||
+    typeof token !== "object" ||
+    typeof (token as TokenPayload).tokenId !== "string" ||
+    typeof (token as TokenPayload).userId !== "number"
+  ) {
+    throw new HttpError(401, "Sessao autenticada nao identificada.");
+  }
+
+  return token as TokenPayload;
+};
+
 export const createAuthenticationMiddleware = (
   options: AuthenticationOptions = {}
 ): RequestHandler => {
@@ -50,6 +65,11 @@ export const createAuthenticationMiddleware = (
     try {
       const token = tokenFromHeader(request.header("Authorization"));
       const payload = await jwtService.verify(token);
+
+      if (await userRepository.isTokenRevoked(payload.tokenId)) {
+        throw new HttpError(401, "Sessao revogada ou expirada.");
+      }
+
       const user = await userRepository.findUserById(payload.userId);
 
       if (!user) {
@@ -57,6 +77,7 @@ export const createAuthenticationMiddleware = (
       }
 
       response.locals.authenticatedUser = user;
+      response.locals.authenticatedToken = payload;
       next();
     } catch (error) {
       response.setHeader("WWW-Authenticate", "Bearer");

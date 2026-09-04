@@ -1,5 +1,11 @@
 import { HttpError } from "../errors/httpError";
-import type { LoginPayload, RegisterUserPayload } from "../types/auth";
+import type {
+  EnableMfaPayload,
+  LoginPayload,
+  PasswordResetPayload,
+  PasswordResetRequestPayload,
+  RegisterUserPayload
+} from "../types/auth";
 
 type RequestBody = Record<string, unknown>;
 
@@ -59,6 +65,36 @@ const parsePassword = (value: unknown): string => {
   return value;
 };
 
+const parseOptionalMfaCode = (value: unknown): string | undefined => {
+  if (value === undefined || value === null || value === "") {
+    return undefined;
+  }
+
+  if (typeof value !== "string" || !/^\d{6}$/u.test(value)) {
+    throw new HttpError(400, "O codigo MFA deve conter 6 digitos.");
+  }
+
+  return value;
+};
+
+const parseResetToken = (value: unknown): string => {
+  if (typeof value !== "string" || value.trim().length < 32 || value.trim().length > 256) {
+    throw new HttpError(400, "Token de recuperacao invalido.");
+  }
+
+  return value.trim();
+};
+
+const parseMfaCode = (value: unknown): string => {
+  const code = parseOptionalMfaCode(value);
+
+  if (!code) {
+    throw new HttpError(400, "O codigo MFA e obrigatorio.");
+  }
+
+  return code;
+};
+
 export const parseRegisterUserPayload = (payload: unknown): RegisterUserPayload => {
   const body = asRequestBody(payload);
 
@@ -74,6 +110,32 @@ export const parseLoginPayload = (payload: unknown): LoginPayload => {
 
   return {
     email: parseEmail(body.email),
+    password: parsePassword(body.password),
+    mfaCode: parseOptionalMfaCode(body.mfaCode)
+  };
+};
+
+export const parsePasswordResetRequestPayload = (payload: unknown): PasswordResetRequestPayload => {
+  const body = asRequestBody(payload);
+
+  return {
+    email: parseEmail(body.email)
+  };
+};
+
+export const parsePasswordResetPayload = (payload: unknown): PasswordResetPayload => {
+  const body = asRequestBody(payload);
+
+  return {
+    token: parseResetToken(body.token),
     password: parsePassword(body.password)
+  };
+};
+
+export const parseEnableMfaPayload = (payload: unknown): EnableMfaPayload => {
+  const body = asRequestBody(payload);
+
+  return {
+    code: parseMfaCode(body.code)
   };
 };

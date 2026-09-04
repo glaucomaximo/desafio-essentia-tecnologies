@@ -1,6 +1,6 @@
 {
   "name": "backend",
-  "version": "2.2.0",
+  "version": "2.3.0",
   "private": true,
   "description": "API RESTful em Node.js e TypeScript para o desafio TechX Tasks.",
   "author": "Glauco Maximo <glaucomaximo@gmail.com>",

@@ -26,7 +26,7 @@ Navegador
 
 ## Módulos do Backend
 
-- `auth`: assinatura e verificação JWT, hash de senha com `scrypt`.
+- `auth`: assinatura e verificação JWT com `jti`, hash de senha com `scrypt`, TOTP para MFA, tokens seguros de recuperação e utilitários de segurança de conta.
 - `config`: configuração orientada por variáveis de ambiente.
 - `db`: conexões MySQL/MongoDB, prontidão e migrações idempotentes.
 - `errors`: modelo de erro HTTP.
@@ -77,7 +77,8 @@ Tarefas antigas em bancos já existentes recebem `owner_user_id` nulo durante a 
 - Cadastro e login retornam JWT assinado com HS256.
 - `JWT_SECRET` é obrigatório em produção e deve ter no mínimo 32 caracteres.
 - Senhas são armazenadas com `scrypt`, sal aleatório e comparação em tempo constante.
-- Rotas de tarefas exigem `Authorization: Bearer <token>`.
+- Rotas de tarefas exigem `Authorization: Bearer <token>` e consultam a sessão no banco para bloquear tokens revogados.
+- Contas possuem bloqueio adaptativo por falhas repetidas, recuperação de senha com token de uso único e MFA TOTP opcional.
 - Consultas e mutacoes de tarefas filtram por `owner_user_id` no servidor.
 - Metadados no MongoDB usam índice único por `ownerUserId` e `taskId`.
 - Cabeçalhos de segurança via Helmet, CORS configurado por ambiente e limite de corpo JSON permanecem ativos.

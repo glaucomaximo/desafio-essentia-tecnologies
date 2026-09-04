@@ -7,7 +7,7 @@ Aplicação fullstack de gerenciamento de tarefas criada para a empresa fictíci
 
 ## Visão Geral
 
-O sistema permite cadastrar usuários, autenticar com JWT, listar, criar, editar, remover e marcar tarefas como concluídas ou pendentes. A entrega foi modernizada com foco em reprodutibilidade, segurança básica, testes, containers, documentação e controles automatizados de qualidade.
+O sistema permite cadastrar usuários, autenticar com JWT, listar, criar, editar, remover e marcar tarefas como concluídas ou pendentes. A entrega foi modernizada com foco em reprodutibilidade, segurança, testes, containers, documentação e controles automatizados de qualidade.
 
 ## Arquitetura
 
@@ -128,7 +128,7 @@ Variáveis principais:
 
 | Variável                         | Descrição                                | Valor local padrão      |
 | -------------------------------- | ---------------------------------------- | ----------------------- |
-| `APP_VERSION`                    | Versão SemVer exposta nas rotas de saúde | `2.2.0`                 |
+| `APP_VERSION`                    | Versão SemVer exposta nas rotas de saúde | `2.3.0`                 |
 | `NODE_ENV`                       | Ambiente lógico da aplicação             | `development`           |
 | `SERVICE_NAME`                   | Nome do serviço nos logs                 | `techx-tasks-api`       |
 | `PORT`                           | Porta interna da API                     | `3333`                  |
@@ -215,7 +215,9 @@ Controles atuais:
 - Limite de corpo JSON.
 - SQL parametrizado com `mysql2`.
 - Senhas armazenadas com hash `scrypt` e sal aleatório.
-- Autenticação JWT HMAC SHA-256 com emissor, audiência e expiração configuráveis.
+- Autenticação JWT HMAC SHA-256 com emissor, audiência, expiração configurável e `jti`.
+- Revogação centralizada da sessão atual ou de todas as sessões do usuário.
+- MFA TOTP opcional, recuperação de senha por token de uso único e bloqueio adaptativo por falhas repetidas.
 - Isolamento server-side de tarefas por usuário autenticado.
 - Limite de requisições configurável para rotas `/api`.
 - Logs JSON com redação de chaves sensíveis.
@@ -242,17 +244,23 @@ Alias legado preservado:
 
 Endpoints:
 
-| Método | Rota                    | Descrição                        |
-| ------ | ----------------------- | -------------------------------- |
-| POST   | `/api/v1/auth/register` | Cria usuário e retorna JWT       |
-| POST   | `/api/v1/auth/login`    | Autentica usuário e retorna JWT  |
-| GET    | `/api/v1/auth/me`       | Retorna usuário autenticado      |
-| GET    | `/api/v1/tasks`         | Lista tarefas autenticadas       |
-| GET    | `/api/v1/tasks/:id`     | Busca uma tarefa                 |
-| POST   | `/api/v1/tasks`         | Cria uma tarefa                  |
-| PUT    | `/api/v1/tasks/:id`     | Atualiza uma tarefa              |
-| PATCH  | `/api/v1/tasks/:id`     | Atualiza parcialmente uma tarefa |
-| DELETE | `/api/v1/tasks/:id`     | Remove uma tarefa                |
+| Método | Rota                                  | Descrição                               |
+| ------ | ------------------------------------- | --------------------------------------- |
+| POST   | `/api/v1/auth/register`               | Cria usuário e retorna JWT              |
+| POST   | `/api/v1/auth/login`                  | Autentica usuário e retorna JWT         |
+| POST   | `/api/v1/auth/password-reset/request` | Solicita recuperação de senha           |
+| POST   | `/api/v1/auth/password-reset/confirm` | Troca senha e revoga sessões anteriores |
+| POST   | `/api/v1/auth/mfa/setup`              | Inicia pareamento TOTP                  |
+| POST   | `/api/v1/auth/mfa/enable`             | Habilita MFA TOTP                       |
+| POST   | `/api/v1/auth/logout`                 | Revoga sessão atual                     |
+| POST   | `/api/v1/auth/logout-all`             | Revoga todas as sessões do usuário      |
+| GET    | `/api/v1/auth/me`                     | Retorna usuário autenticado             |
+| GET    | `/api/v1/tasks`                       | Lista tarefas autenticadas              |
+| GET    | `/api/v1/tasks/:id`                   | Busca uma tarefa                        |
+| POST   | `/api/v1/tasks`                       | Cria uma tarefa                         |
+| PUT    | `/api/v1/tasks/:id`                   | Atualiza uma tarefa                     |
+| PATCH  | `/api/v1/tasks/:id`                   | Atualiza parcialmente uma tarefa        |
+| DELETE | `/api/v1/tasks/:id`                   | Remove uma tarefa                       |
 
 As rotas de tarefas exigem:
 

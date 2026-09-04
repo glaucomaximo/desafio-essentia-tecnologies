@@ -42,21 +42,8 @@ jobs:
         run: npm test
 
       - name: Auditar dependências de produção
-        shell: bash
         timeout-minutes: 5
-        run: |
-          set -euo pipefail
-          for tentativa in 1 2 3; do
-            if npm audit --omit=dev --audit-level=moderate --fetch-timeout=30000 --fetch-retries=1; then
-              exit 0
-            fi
-
-            if [ "${tentativa}" -eq 3 ]; then
-              exit 1
-            fi
-
-            sleep "$((tentativa * 15))"
-          done
+        run: npm run audit:prod
 
       - name: Varrer padrões de segredo
         shell: bash

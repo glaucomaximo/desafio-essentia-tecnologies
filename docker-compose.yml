@@ -48,7 +48,7 @@ services:
     environment:
       NODE_ENV: ${NODE_ENV:-development}
       SERVICE_NAME: techx-tasks-api
-      APP_VERSION: ${APP_VERSION:-2.2.0}
+      APP_VERSION: ${APP_VERSION:-2.3.0}
       PORT: 3333
       CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:4200}
       LOG_LEVEL: ${LOG_LEVEL:-info}

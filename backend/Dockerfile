@@ -6,7 +6,7 @@ COPY package.json package-lock.json ./
 COPY backend/package.json ./backend/package.json
 COPY frontend/package.json ./frontend/package.json
 
-RUN npm ci --workspace backend
+RUN npm ci --workspace backend --no-audit --fund=false
 
 FROM dependencies AS build
 
@@ -27,7 +27,7 @@ COPY package.json package-lock.json ./
 COPY backend/package.json ./backend/package.json
 COPY frontend/package.json ./frontend/package.json
 
-RUN npm ci --workspace backend --omit=dev \
+RUN npm ci --workspace backend --omit=dev --no-audit --fund=false \
   && npm cache clean --force \
   && rm -rf /usr/local/lib/node_modules/npm \
     /usr/local/lib/node_modules/corepack \

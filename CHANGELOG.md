@@ -4,6 +4,26 @@ Todas as alterações relevantes deste projeto são documentadas aqui.
 
 Autor: Glauco Maximo <glaucomaximo@gmail.com>
 
+## [2.3.0] - 2026-09-04
+
+### Adicionado
+
+- JWT com identificador `jti` persistido em `token_sessions` para revogação centralizada.
+- Rotas `/api/v1/auth/logout` e `/api/v1/auth/logout-all` para encerrar sessões.
+- Recuperação de senha com token seguro de uso único e revogação automática de sessões antigas.
+- Bloqueio adaptativo de conta após falhas repetidas de autenticação.
+- MFA TOTP opcional com rotas de setup e habilitação.
+- Migrações incrementais para colunas e tabelas de segurança de conta.
+- Testes de regressão para MFA, recuperação de senha, bloqueio adaptativo e revogação de tokens.
+
+### Alterado
+
+- Contrato OpenAPI, README, documentação da API, arquitetura e política de segurança refletem os novos controles.
+
+### Validado
+
+- Versão SemVer promovida para `2.3.0` por adicionar funcionalidades de segurança compatíveis.
+
 ## [2.2.0] - 2026-09-04
 
 ### Adicionado

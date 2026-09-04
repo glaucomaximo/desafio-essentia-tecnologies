@@ -29,4 +29,4 @@ Reporte vulnerabilidades de forma privada para Glauco Maximo em glaucomaximo@gma
 
 ## Escopo Atual
 
-O escopo atual implementa cadastro, login, JWT e isolamento server-side das tarefas por usuário. Proteções avançadas de conta, como MFA, recuperação de senha, bloqueio adaptativo e revogação centralizada de tokens, permanecem fora do escopo demonstrativo e devem ser tratadas como P1 antes de uso produtivo real.
+O escopo atual implementa cadastro, login, JWT com identificador `jti`, isolamento server-side das tarefas por usuário, MFA TOTP, recuperação de senha por token de uso único, bloqueio adaptativo por falhas repetidas e revogação centralizada de sessões. Em produção, o envio de tokens de recuperação deve ocorrer por canal externo seguro e auditável.

@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: API TechX Tasks
-  version: 2.2.0
+  version: 2.3.0
   description: API REST para o desafio fullstack da Essentia Group.
   contact:
     name: Glauco Maximo
@@ -107,6 +107,118 @@ paths:
                 $ref: "#/components/schemas/AuthSession"
         "400":
           $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "423":
+          description: Conta temporariamente bloqueada.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+  /api/v1/auth/password-reset/request:
+    post:
+      tags: [Autenticacao]
+      summary: Solicitar recuperacao de senha
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PasswordResetRequest"
+      responses:
+        "202":
+          description: Solicitacao aceita sem revelar existencia da conta.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  resetToken:
+                    type: string
+                    description: Disponivel apenas em desenvolvimento local.
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+  /api/v1/auth/password-reset/confirm:
+    post:
+      tags: [Autenticacao]
+      summary: Confirmar recuperacao de senha
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PasswordResetConfirmRequest"
+      responses:
+        "204":
+          description: Senha alterada e sessoes anteriores revogadas.
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+  /api/v1/auth/mfa/setup:
+    post:
+      tags: [Autenticacao]
+      summary: Iniciar MFA TOTP
+      security:
+        - bearerAuth: []
+      responses:
+        "201":
+          description: Segredo TOTP criado para pareamento.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MfaSetupResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+  /api/v1/auth/mfa/enable:
+    post:
+      tags: [Autenticacao]
+      summary: Habilitar MFA TOTP
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MfaEnableRequest"
+      responses:
+        "204":
+          description: MFA habilitado.
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+  /api/v1/auth/logout:
+    post:
+      tags: [Autenticacao]
+      summary: Revogar sessao atual
+      security:
+        - bearerAuth: []
+      responses:
+        "204":
+          description: Sessao atual revogada.
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+  /api/v1/auth/logout-all:
+    post:
+      tags: [Autenticacao]
+      summary: Revogar todas as sessoes
+      security:
+        - bearerAuth: []
+      responses:
+        "204":
+          description: Todas as sessoes do usuario foram revogadas.
         "401":
           $ref: "#/components/responses/Unauthorized"
         "429":
@@ -340,10 +452,13 @@ components:
           maxLength: 254
     AuthSession:
       type: object
-      required: [token, expiresAt, user]
+      required: [token, tokenId, expiresAt, user]
       properties:
         token:
           type: string
+        tokenId:
+          type: string
+          format: uuid
         expiresAt:
           type: string
           format: date-time
@@ -378,6 +493,50 @@ components:
           type: string
           minLength: 8
           maxLength: 128
+        mfaCode:
+          type: string
+          minLength: 6
+          maxLength: 6
+      additionalProperties: true
+    PasswordResetRequest:
+      type: object
+      required: [email]
+      properties:
+        email:
+          type: string
+          format: email
+          maxLength: 254
+      additionalProperties: true
+    PasswordResetConfirmRequest:
+      type: object
+      required: [token, password]
+      properties:
+        token:
+          type: string
+          minLength: 32
+          maxLength: 256
+        password:
+          type: string
+          minLength: 8
+          maxLength: 128
+      additionalProperties: true
+    MfaSetupResponse:
+      type: object
+      required: [secret, otpauthUrl]
+      properties:
+        secret:
+          type: string
+        otpauthUrl:
+          type: string
+          format: uri
+    MfaEnableRequest:
+      type: object
+      required: [code]
+      properties:
+        code:
+          type: string
+          minLength: 6
+          maxLength: 6
       additionalProperties: true
     Task:
       type: object

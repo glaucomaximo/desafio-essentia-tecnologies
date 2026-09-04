@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import type { Express } from "express";
 import request from "supertest";
+import { createTotpCode } from "../src/auth/accountSecurity";
 import { createJwtService } from "../src/auth/jwtService";
 import { HttpError } from "../src/errors/httpError";
 import { createApp, type AppOptions } from "../src/app";
@@ -145,6 +146,11 @@ class InMemoryTaskMetadataRepository implements TaskMetadataRepository {
 class InMemoryUserRepository implements UserRepository {
   private nextId = 1;
   private readonly users = new Map<number, UserWithPassword>();
+  private readonly tokenSessions = new Map<string, { userId: number; revokedAt: string | null }>();
+  private readonly resetTokens = new Map<
+    string,
+    { userId: number; expiresAt: Date; consumedAt: string | null }
+  >();
 
   async createUser(payload: CreateUserRecordPayload): Promise<AuthenticatedUser> {
     if (await this.findUserByEmail(payload.email)) {
@@ -156,6 +162,10 @@ class InMemoryUserRepository implements UserRepository {
       name: payload.name,
       email: payload.email,
       passwordHash: payload.passwordHash,
+      mfaEnabled: false,
+      mfaSecret: null,
+      failedLoginAttempts: 0,
+      lockedUntil: null,
       createdAt: fixedTimestamp,
       updatedAt: fixedTimestamp
     };
@@ -186,6 +196,93 @@ class InMemoryUserRepository implements UserRepository {
       name: user.name,
       email: user.email
     };
+  }
+
+  async updatePassword(userId: number, passwordHash: string): Promise<void> {
+    const user = this.users.get(userId);
+
+    if (user) {
+      this.users.set(userId, {
+        ...user,
+        passwordHash,
+        failedLoginAttempts: 0,
+        lockedUntil: null
+      });
+    }
+  }
+
+  async updateLoginProtection(
+    userId: number,
+    failedAttempts: number,
+    lockedUntil: Date | null
+  ): Promise<void> {
+    const user = this.users.get(userId);
+
+    if (user) {
+      this.users.set(userId, {
+        ...user,
+        failedLoginAttempts: failedAttempts,
+        lockedUntil: lockedUntil?.toISOString() ?? null
+      });
+    }
+  }
+
+  async updateMfaSecret(userId: number, secret: string | null, enabled: boolean): Promise<void> {
+    const user = this.users.get(userId);
+
+    if (user) {
+      this.users.set(userId, {
+        ...user,
+        mfaSecret: secret,
+        mfaEnabled: enabled
+      });
+    }
+  }
+
+  async createTokenSession(tokenId: string, userId: number): Promise<void> {
+    this.tokenSessions.set(tokenId, { userId, revokedAt: null });
+  }
+
+  async isTokenRevoked(tokenId: string): Promise<boolean> {
+    const session = this.tokenSessions.get(tokenId);
+
+    return !session || Boolean(session.revokedAt);
+  }
+
+  async revokeToken(tokenId: string): Promise<void> {
+    const session = this.tokenSessions.get(tokenId);
+
+    if (session) {
+      this.tokenSessions.set(tokenId, { ...session, revokedAt: fixedTimestamp });
+    }
+  }
+
+  async revokeUserTokens(userId: number): Promise<void> {
+    for (const [tokenId, session] of this.tokenSessions) {
+      if (session.userId === userId) {
+        this.tokenSessions.set(tokenId, { ...session, revokedAt: fixedTimestamp });
+      }
+    }
+  }
+
+  async createPasswordResetToken(
+    userId: number,
+    tokenHash: string,
+    expiresAt: Date
+  ): Promise<void> {
+    this.resetTokens.set(tokenHash, { userId, expiresAt, consumedAt: null });
+  }
+
+  async consumePasswordResetToken(tokenHash: string): Promise<UserWithPassword | null> {
+    const resetToken = this.resetTokens.get(tokenHash);
+
+    if (!resetToken || resetToken.consumedAt || resetToken.expiresAt.getTime() <= Date.now()) {
+      return null;
+    }
+
+    resetToken.consumedAt = fixedTimestamp;
+
+    return this.users.get(resetToken.userId) ?? null;
   }
 }
 
@@ -268,6 +365,99 @@ test("POST /api/v1/auth/register, POST /login and GET /me manage authenticated s
     .expect(200);
 
   assert.equal(meResponse.body.user.name, "Glauco Maximo");
+});
+
+test("POST /api/v1/auth/logout revoga centralmente a sessao atual", async () => {
+  const app = createTestApp();
+  const token = await registerAndToken(app);
+
+  await request(app)
+    .post("/api/v1/auth/logout")
+    .set("Authorization", `Bearer ${token}`)
+    .expect(204);
+
+  const response = await request(app)
+    .get("/api/v1/auth/me")
+    .set("Authorization", `Bearer ${token}`)
+    .expect(401);
+
+  assert.equal(response.body.message, "Sessao revogada ou expirada.");
+});
+
+test("POST /api/v1/auth/password-reset renova senha e revoga sessoes antigas", async () => {
+  const app = createTestApp();
+  const token = await registerAndToken(app);
+
+  const resetRequest = await request(app)
+    .post("/api/v1/auth/password-reset/request")
+    .send({ email: "glauco.maximo@example.test" })
+    .expect(202);
+
+  assert.equal(typeof resetRequest.body.resetToken, "string");
+
+  await request(app)
+    .post("/api/v1/auth/password-reset/confirm")
+    .send({ token: resetRequest.body.resetToken, password: "NovaSenha123" })
+    .expect(204);
+
+  await request(app).get("/api/v1/auth/me").set("Authorization", `Bearer ${token}`).expect(401);
+
+  await request(app)
+    .post("/api/v1/auth/login")
+    .send({ email: "glauco.maximo@example.test", password: "NovaSenha123" })
+    .expect(200);
+});
+
+test("POST /api/v1/auth/login aplica bloqueio adaptativo apos falhas repetidas", async () => {
+  const app = createTestApp();
+  await registerAndToken(app);
+
+  for (let attempt = 0; attempt < 5; attempt += 1) {
+    await request(app)
+      .post("/api/v1/auth/login")
+      .send({ email: "glauco.maximo@example.test", password: "SenhaErrada123" })
+      .expect(401);
+  }
+
+  const response = await request(app)
+    .post("/api/v1/auth/login")
+    .send({ email: "glauco.maximo@example.test", password: "Senha1234" })
+    .expect(423);
+
+  assert.equal(
+    response.body.message,
+    "Conta temporariamente bloqueada. Tente novamente mais tarde."
+  );
+});
+
+test("POST /api/v1/auth/mfa habilita TOTP e passa a exigir codigo no login", async () => {
+  const app = createTestApp();
+  const token = await registerAndToken(app);
+
+  const setup = await request(app)
+    .post("/api/v1/auth/mfa/setup")
+    .set("Authorization", `Bearer ${token}`)
+    .expect(201);
+
+  await request(app)
+    .post("/api/v1/auth/mfa/enable")
+    .set("Authorization", `Bearer ${token}`)
+    .send({ code: createTotpCode(setup.body.secret) })
+    .expect(204);
+
+  await request(app)
+    .post("/api/v1/auth/login")
+    .send({ email: "glauco.maximo@example.test", password: "Senha1234" })
+    .expect(401);
+
+  await request(app)
+    .post("/api/v1/auth/login")
+    .send({
+      email: "glauco.maximo@example.test",
+      password: "Senha1234",
+      mfaCode: createTotpCode(setup.body.secret)
+    })
+    .expect(200);
 });
 
 test("GET /api/v1/tasks requires a Bearer token", async () => {
