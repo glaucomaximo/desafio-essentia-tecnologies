@@ -21,7 +21,7 @@ Atualizar Angular e Express em uma etapa controlada, alinhar Node.js para 24.15.
 ## Alternativas Consideradas
 
 - Permanecer em Angular 18 e documentar exceções: rejeitado porque vulnerabilidades de produção são evitáveis neste projeto pequeno.
-- Atualizar TypeScript para 7.x: rejeitado porque Angular 22 exige TypeScript `<6.1`.
+- Atualizar TypeScript para 7.x: rejeitado temporariamente porque Angular 22.1.5 exige TypeScript `>=6.0 <6.1`.
 
 ## Impacto de Segurança
 

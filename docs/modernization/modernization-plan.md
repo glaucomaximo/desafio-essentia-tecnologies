@@ -28,8 +28,9 @@ Estado: concluída para dependências de produção.
 Entregas:
 
 - Express atualizado para 5.2.x.
-- Angular atualizado para 22.1.x.
+- Angular atualizado para 22.1.5.
 - TypeScript atualizado para 6.0.x.
+- Tailwind CSS 4.3.3 integrado ao frontend.
 - Node alvo atualizado para 24.15.0.
 - `npm audit --omit=dev` sem vulnerabilidades.
 - Lockfile atualizado.
@@ -37,6 +38,7 @@ Entregas:
 Pendência:
 
 - Auditoria completa ainda possui vulnerabilidades moderadas restritas ao desenvolvimento no ferramental Angular atual.
+- TypeScript 7 deve aguardar suporte oficial do Angular; `@angular/compiler-cli@22.1.5` ainda exige TypeScript `>=6.0 <6.1`.
 
 ## Fase 2 - Qualidade Estrutural
 
@@ -51,6 +53,9 @@ Entregas:
 - API canônica `/api/v1/tasks`.
 - Alias legado `/api/tasks` preservado.
 - `tsconfig` atualizado para TypeScript 6 sem opções legadas.
+- Frontend separado em fachada reativa e componentes standalone de autenticação/tarefas.
+- Templates migrados para `@if`, `@for`, `@switch` e `@defer`.
+- Runtime Angular migrado para zoneless com Signals.
 
 ## Fase 3 - Testes
 
@@ -172,6 +177,7 @@ Entregas:
 - P1: definir registro OCI, política de tags SemVer, pinning por digest, assinatura e proveniência.
 - P1: definir estratégia de rotação/revogação de JWT para produção.
 - P2: acompanhar release do ferramental Angular para remover vulnerabilidades moderadas restritas ao desenvolvimento restantes.
+- P2: migrar para TypeScript 7 quando o Angular publicar suporte oficial.
 - P2: introduzir histórico de migrações se o esquema evoluir.
 - P2: adicionar testes de frontend para interações principais.
 - P3: adicionar métricas/rastreamento OpenTelemetry se houver operação em ambiente compartilhado.

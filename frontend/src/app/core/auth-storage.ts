@@ -1,4 +1,5 @@
-import { Injectable } from "@angular/core";
+import { isPlatformBrowser } from "@angular/common";
+import { Injectable, PLATFORM_ID, inject } from "@angular/core";
 import type { AuthSession } from "./auth.model";
 
 const storageKey = "techx.tasks.auth";
@@ -7,8 +8,14 @@ const storageKey = "techx.tasks.auth";
   providedIn: "root"
 })
 export class AuthStorage {
+  private readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
+
   loadSession(): AuthSession | null {
-    const rawSession = window.localStorage.getItem(storageKey);
+    if (!this.isBrowser) {
+      return null;
+    }
+
+    const rawSession = globalThis.localStorage.getItem(storageKey);
 
     if (!rawSession) {
       return null;
@@ -30,11 +37,19 @@ export class AuthStorage {
   }
 
   saveSession(session: AuthSession): void {
-    window.localStorage.setItem(storageKey, JSON.stringify(session));
+    if (!this.isBrowser) {
+      return;
+    }
+
+    globalThis.localStorage.setItem(storageKey, JSON.stringify(session));
   }
 
   clearSession(): void {
-    window.localStorage.removeItem(storageKey);
+    if (!this.isBrowser) {
+      return;
+    }
+
+    globalThis.localStorage.removeItem(storageKey);
   }
 
   token(): string | null {

@@ -13,7 +13,7 @@ O sistema permite cadastrar usuários, autenticar com JWT, listar, criar, editar
 
 Arquitetura atual: monólito modular com dois processos.
 
-- `frontend`: Angular 22 servido por Nginx sem privilégios de root.
+- `frontend`: Angular 22.1.5 standalone, zoneless, Signals e Tailwind CSS 4.3.3, servido por Nginx sem privilégios de root.
 - `backend`: Node.js 24, TypeScript, Express 5, MySQL e MongoDB.
 - `banco relacional`: usuarios e registro principal das tarefas em MySQL.
 - `banco NoSQL`: metadados adicionais das tarefas em MongoDB.
@@ -39,6 +39,8 @@ Documentação complementar:
 - MySQL 8.4 e MongoDB 8.0 quando executar sem Compose.
 
 Use `.nvmrc` para alinhar a versão local do Node.
+
+Nota sobre TypeScript 7: a versão `7.0.2` já existe no npm, mas `@angular/compiler-cli@22.1.5` declara suporte oficial apenas para TypeScript `>=6.0 <6.1`. Por isso o projeto permanece em TypeScript `6.0.3` até o Angular publicar compatibilidade oficial; instalar TypeScript 7 agora deixaria o build fora do contrato suportado.
 
 ## Desenvolvimento Local
 
@@ -118,7 +120,7 @@ Variáveis principais:
 
 | Variável                         | Descrição                                | Valor local padrão      |
 | -------------------------------- | ---------------------------------------- | ----------------------- |
-| `APP_VERSION`                    | Versão SemVer exposta nas rotas de saúde | `2.0.0`                 |
+| `APP_VERSION`                    | Versão SemVer exposta nas rotas de saúde | `2.1.0`                 |
 | `NODE_ENV`                       | Ambiente lógico da aplicação             | `development`           |
 | `SERVICE_NAME`                   | Nome do serviço nos logs                 | `techx-tasks-api`       |
 | `PORT`                           | Porta interna da API                     | `3333`                  |

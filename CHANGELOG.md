@@ -4,6 +4,31 @@ Todas as alterações relevantes deste projeto são documentadas aqui.
 
 Autor: Glauco Maximo <glaucomaximo@gmail.com>
 
+## [2.1.0] - 2026-09-03
+
+### Adicionado
+
+- Tailwind CSS 4.3.3 integrado ao build Angular via PostCSS.
+- Componentes standalone de autenticação, formulário e lista de tarefas com APIs reativas `input()` e `output()`.
+- ADR para adoção de frontend Angular zoneless, Signals e Tailwind.
+
+### Alterado
+
+- Frontend migrado para aplicação zoneless com `provideZonelessChangeDetection`.
+- Removido `zone.js` do runtime e dos polyfills do Angular.
+- Template raiz e componentes migrados de `*ngIf`/`*ngFor` para `@if`, `@for`, `@switch` e `@defer`.
+- Lista de tarefas carregada em chunk lazy por `@defer (on viewport; prefetch on idle)`.
+- Orquestração de autenticação, formulários e tarefas movida para fachada injetável baseada em Signals.
+- `AuthStorage` tornado seguro para SSR/hydration por meio de `isPlatformBrowser`.
+
+### Documentado
+
+- TypeScript 7 permanece bloqueado temporariamente porque Angular 22.1.5 suporta oficialmente TypeScript `>=6.0 <6.1`.
+
+### Mudança Incompatível
+
+- Nenhuma breaking change funcional ou de API.
+
 ## [2.0.0] - 2026-09-03
 
 ### Adicionado

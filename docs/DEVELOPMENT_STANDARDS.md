@@ -8,6 +8,8 @@ Diretrizes aplicadas neste projeto para manter uma entrega alinhada a práticas 
 ## Engenharia
 
 - TypeScript em modo estrito no backend e no frontend.
+- Frontend Angular standalone, zoneless e orientado por Signals.
+- Templates Angular com `@if`, `@for`, `@switch` e `@defer`; diretivas estruturais legadas não devem ser reintroduzidas.
 - Monólito modular com separação por responsabilidade: configuração, banco, erros, middleware, repositórios, rotas, validação, tipos e utilitários compartilhados.
 - API REST versionada em `/api/v1`, com alias legado preservado em `/api/tasks`.
 - Validação de entrada antes de acessar a camada de persistência.
@@ -45,6 +47,7 @@ Diretrizes aplicadas neste projeto para manter uma entrega alinhada a práticas 
 - `npm run typecheck`, `npm test` e `npm run build` como controles locais.
 - OpenAPI em `docs/api/openapi.yaml`.
 - ADRs para decisões arquiteturais relevantes.
+- TypeScript 7 só deve ser adotado quando a versão estável do Angular declarar suporte oficial compatível.
 
 ## Cadeia de Suprimentos
 
